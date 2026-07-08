@@ -5,6 +5,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @Data
 @Entity
 @Getter
@@ -14,11 +18,14 @@ public class GameMaster
 {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String nome;
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "gameMaster")
+    private List<Partita> games = new ArrayList<>();
 }
