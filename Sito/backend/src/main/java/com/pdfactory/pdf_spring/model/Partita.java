@@ -7,10 +7,10 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "Utente")
-public class Utente
+@Table(name = "Partita")
+public class Partita
 {
     @Id
     private Long id;
-    private String name;
+    private Long cod_part;
 }
