@@ -1,0 +1,29 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h1>Dashboard Game Master</h1>
+  </header>
+
+  <main class="dashboard-content">
+    @if (!currentGame()) {
+      <button type="button" class="create-btn" (click)="createGame()" [disabled]="loading()">
+        @if (loading()) {
+          Creazione in corso...
+        } @else {
+          Nuova partita
+        }
+      </button>
+    }
+
+    @if (error()) {
+      <p class="error">Non sono riuscito a creare la partita. Riprova.</p>
+    }
+
+    @if (currentGame(); as game) {
+      <div class="game-code-card">
+        <p class="label">Codice partita</p>
+        <p class="code">{{ game.codice }}</p>
+        <p class="status">Stato: {{ game.status }}</p>
+      </div>
+    }
+  </main>
+</div>

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Entity
 @Getter
 @Setter
@@ -26,7 +25,7 @@ public class Partita
 
     // Codice mostrato a schermo dal GM per far entrare gli studenti
     @Column(nullable = false, unique = true, length = 10)
-    private String cod_partita;
+    private String codPartita;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gameMaster_id", nullable = false)

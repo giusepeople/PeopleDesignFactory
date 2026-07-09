@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
+
+:host {
+  --teal-a: #0b4f45;
+  --teal-b: #17876b;
+  --text: #202325;
+  --text-muted: #6c7378;
+  --border: #dde1e2;
+  --dark-btn: #202325;
+  --dark-btn-hover: #34383b;
+  --error: #d64545;
+
+  display: block;
+  min-height: 100vh;
+}
+
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--teal-a) 0%, var(--teal-b) 100%);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboard-header {
+  padding: 28px 32px;
+}
+
+.dashboard-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+}
+
+.create-btn {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  background: var(--dark-btn);
+  border: none;
+  border-radius: 10px;
+  padding: 16px 36px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.create-btn:hover:not(:disabled) {
+  background: var(--dark-btn-hover);
+}
+
+.create-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.error {
+  font-weight: 600;
+  color: #ffd9d9;
+}
+
+.game-code-card {
+  background: #fff;
+  color: var(--text);
+  border-radius: 14px;
+  padding: 28px 40px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.code {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0 0 8px;
+}
+
+.status {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}

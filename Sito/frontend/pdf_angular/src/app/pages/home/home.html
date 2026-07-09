@@ -1,1 +1,82 @@
-<p>home works!</p>
+<div class="page">
+  <div class="bg-shape bg-shape--a" aria-hidden="true"></div>
+  <div class="bg-shape bg-shape--b" aria-hidden="true"></div>
+
+  <button type="button" class="admin-trigger" (click)="openAdminModal()">
+    Admin
+  </button>
+
+  <main class="stage">
+    <div class="wordmark">Workshop</div>
+
+    <div class="pin-card">
+      <input
+        class="pin-input"
+        [class.pin-input--error]="pinError()"
+        type="text"
+        inputmode="text"
+        autocomplete="off"
+        spellcheck="false"
+        maxlength="6"
+        placeholder="PIN di gioco"
+        [value]="pin()"
+        (input)="onPinInput($event)"
+        (keydown.enter)="joinGame()"
+        aria-label="Codice partita"
+      />
+      <button type="button" class="join-btn" (click)="joinGame()">
+        Conferma
+      </button>
+    </div>
+
+    @if (pinError()) {
+      <p class="field-error">Serve un codice di almeno 4 caratteri.</p>
+    }
+  </main>
+
+  @if (showAdminModal()) {
+    <div class="modal-backdrop" (click)="closeAdminModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeAdminModal()"
+          aria-label="Chiudi"
+        >
+          ✕
+        </button>
+
+        <h2 class="modal-title">Accedi come Game Master</h2>
+
+        <label class="field-label" for="admin-username">Username</label>
+        <input
+          id="admin-username"
+          class="modal-input"
+          type="text"
+          autocomplete="username"
+          [value]="adminUsername()"
+          (input)="onAdminUsernameInput($event)"
+        />
+
+        <label class="field-label" for="admin-password">Password</label>
+        <input
+          id="admin-password"
+          class="modal-input"
+          type="password"
+          autocomplete="current-password"
+          [value]="adminPassword()"
+          (input)="onAdminPasswordInput($event)"
+          (keydown.enter)="adminLogin()"
+        />
+
+        @if (adminError()) {
+          <p class="field-error">Inserisci username e password.</p>
+        }
+
+        <button type="button" class="modal-submit" (click)="adminLogin()">
+          Accedi
+        </button>
+      </div>
+    </div>
+  }
+</div>
