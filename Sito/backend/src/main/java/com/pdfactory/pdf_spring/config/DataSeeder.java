@@ -21,10 +21,10 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (gameMasterRepository.findByNome("gamemaster").isEmpty()) {
             GameMaster gm = new GameMaster();
-            gm.setNome("gamemaster");
-            gm.setPassword(passwordEncoder.encode("CambiaQuestaPassword!"));
+            gm.setNome("root");
+            gm.setPassword(passwordEncoder.encode("root"));
             gameMasterRepository.save(gm);
-            System.out.println("GM di default creato -> username: gamemaster / password: CambiaQuestaPassword!");
+            System.out.println("GM di default creato -> username: root / password: root!");
         }
     }
 }
