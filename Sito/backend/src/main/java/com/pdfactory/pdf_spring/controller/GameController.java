@@ -7,6 +7,8 @@ import com.pdfactory.pdf_spring.repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -31,6 +33,7 @@ public class GameController {
     private final GiocatoreRepository giocatoreRepository;
     private final GruppoRepository gruppoRepository;
     private final RuoloRepository ruoloRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public GameController(PartitaRepository partitaRepository, GameMasterRepository gameMasterRepository,
                           FaseRepository faseRepository, ModuloRepository moduloRepository,
@@ -301,5 +304,92 @@ public class GameController {
         } while (partitaRepository.findByCodPartita(code).isPresent());
 
         return code;
+    }
+
+    // ---------- fase corrente (pubblico: GM e giocatori) ----------
+
+    @GetMapping("/{id}/fase-corrente")
+    public ResponseEntity<?> getFaseCorrente(@PathVariable UUID id) {
+        Partita partita = partitaRepository.findById(id).orElse(null);
+        if (partita == null) {
+            return ResponseEntity.status(404).body("Partita non trovata");
+        }
+
+        return ResponseEntity.ok(buildFaseCorrenteResponse(partita));
+    }
+
+    // ---------- GM: avanzamento manuale di fase ----------
+
+    @PostMapping("/{id}/avanza-fase")
+    public ResponseEntity<?> avanzaFase(@PathVariable UUID id, Authentication authentication) {
+        Partita partita = partitaRepository.findById(id).orElse(null);
+        if (partita == null) {
+            return ResponseEntity.status(404).body("Partita non trovata");
+        }
+
+        if (!partita.getGameMaster().getNome().equals(authentication.getName())) {
+            return ResponseEntity.status(403).body("Non sei il Game Master di questa partita");
+        }
+
+        if (partita.getStatus() != StatoGioco.IN_CORSO) {
+            return ResponseEntity.status(409).body("La partita non è in corso");
+        }
+
+        List<Fase> fasi = faseRepository.findAllByOrderByOrdinalAsc();
+        Fase attuale = partita.getFaseAttuale();
+
+        Fase prossima = fasi.stream()
+                .filter(f -> attuale == null || f.getOrdinal() > attuale.getOrdinal())
+                .findFirst()
+                .orElse(null);
+
+        if (prossima == null) {
+            partita.setStatus(StatoGioco.TERMINATA);
+            partita.setEndedAt(Instant.now());
+        } else {
+            partita.setFaseAttuale(prossima);
+            partita.setFaseIniziataIl(Instant.now());
+        }
+
+        partitaRepository.save(partita);
+
+        return ResponseEntity.ok(buildPannello(partita));
+    }
+
+    private FaseCorrenteResponse buildFaseCorrenteResponse(Partita partita) {
+        Fase fase = partita.getFaseAttuale();
+
+        FaseCorrenteDTO faseDto = null;
+        Long secondiRimanenti = null;
+        String contenuto = null;
+        List<DatoBriefingDTO> dati = List.of();
+
+        if (fase != null) {
+            faseDto = new FaseCorrenteDTO(fase.getId(), fase.getOrdinal(), fase.getNome(),
+                    fase.getTipo().name(), fase.getDefaultDurataMinuti());
+            contenuto = fase.getContenutoTesto();
+            dati = parseDati(fase.getDatiJson());
+
+            if (partita.getFaseIniziataIl() != null) {
+                long durataSec = fase.getDefaultDurataMinuti() * 60L;
+                long trascorsi = Instant.now().getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
+                secondiRimanenti = Math.max(0, durataSec - trascorsi);
+            }
+        }
+
+        return new FaseCorrenteResponse(
+                partita.getStatus().name(), faseDto, partita.getFaseIniziataIl(), secondiRimanenti, contenuto, dati
+        );
+    }
+
+    private List<DatoBriefingDTO> parseDati(String datiJson) {
+        if (datiJson == null || datiJson.isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(datiJson, new TypeReference<List<DatoBriefingDTO>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

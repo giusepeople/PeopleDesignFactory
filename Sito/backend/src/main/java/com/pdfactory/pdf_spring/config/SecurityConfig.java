@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         // rotte pubbliche dei giocatori, le apriremo negli step successivi
-                        .requestMatchers("/games/join", "/games/*/state").permitAll()
+                        .requestMatchers("/games/join", "/games/*/state", "/games/*/fase-corrente").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

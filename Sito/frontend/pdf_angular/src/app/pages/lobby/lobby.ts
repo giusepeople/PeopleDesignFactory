@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GameService, LobbyState } from '../../core/game.service';
+import { GameService, LobbyState, FaseCorrenteResponse } from '../../core/game.service';
+import { formatSecondi } from '../../core/countdown.util';
 
 interface PlayerSession {
   giocatoreId: string;
@@ -22,8 +23,12 @@ export class Lobby implements OnInit, OnDestroy {
   partitaId = '';
   session = signal<PlayerSession | null>(null);
   state = signal<LobbyState | null>(null);
+  faseCorrente = signal<FaseCorrenteResponse | null>(null);
   errorMsg = signal('');
+  secondiVisualizzati = signal<number | null>(null);
+
   private pollHandle: ReturnType<typeof setInterval> | undefined;
+  private tickHandle: ReturnType<typeof setInterval> | undefined;
 
   ngOnInit() {
     this.partitaId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -37,13 +42,13 @@ export class Lobby implements OnInit, OnDestroy {
     }
 
     this.refresh();
-    this.pollHandle = setInterval(() => this.refresh(), 3000);
+    this.pollHandle = setInterval(() => this.refresh(), 4000);
+    this.tickHandle = setInterval(() => this.tick(), 1000);
   }
 
   ngOnDestroy() {
-    if (this.pollHandle) {
-      clearInterval(this.pollHandle);
-    }
+    if (this.pollHandle) clearInterval(this.pollHandle);
+    if (this.tickHandle) clearInterval(this.tickHandle);
   }
 
   refresh() {
@@ -51,6 +56,25 @@ export class Lobby implements OnInit, OnDestroy {
       next: (s) => this.state.set(s),
       error: () => this.errorMsg.set('Impossibile aggiornare lo stato della partita.'),
     });
+
+    this.gameService.getFaseCorrente(this.partitaId).subscribe({
+      next: (f) => {
+        this.faseCorrente.set(f);
+        this.secondiVisualizzati.set(f.secondiRimanenti);
+      },
+      error: () => {},
+    });
+  }
+
+  private tick() {
+    const attuale = this.secondiVisualizzati();
+    if (attuale !== null && attuale > 0) {
+      this.secondiVisualizzati.set(attuale - 1);
+    }
+  }
+
+  get tempoFormattato(): string {
+    return formatSecondi(this.secondiVisualizzati());
   }
 
   get me() {

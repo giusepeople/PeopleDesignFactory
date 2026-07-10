@@ -86,6 +86,20 @@ export interface PannelloControllo {
   giocatoriSenzaGruppo: GiocatoreDettaglio[];
 }
 
+export interface DatoBriefing {
+  label: string;
+  valore: string;
+}
+
+export interface FaseCorrenteResponse {
+  partitaStatus: string;
+  fase: FaseCorrente | null;
+  faseIniziataIl: string | null;
+  secondiRimanenti: number | null;
+  contenutoTesto: string | null;
+  dati: DatoBriefing[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GameService {
   private readonly apiUrl = 'http://localhost:8080';
@@ -118,5 +132,13 @@ export class GameService {
 
   getPannello(partitaId: string): Observable<PannelloControllo> {
     return this.http.get<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/pannello`);
+  }
+
+  getFaseCorrente(partitaId: string): Observable<FaseCorrenteResponse> {
+    return this.http.get<FaseCorrenteResponse>(`${this.apiUrl}/games/${partitaId}/fase-corrente`);
+  }
+
+  avanzaFase(partitaId: string): Observable<PannelloControllo> {
+    return this.http.post<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/avanza-fase`, {});
   }
 }

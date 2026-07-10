@@ -29,7 +29,7 @@ public class GameStructureSeeder implements CommandLineRunner {
             return; // già seedato, non duplicare
         }
 
-        creaFase(1, "Briefing", TipoFase.BRIEFING, 10);
+        Fase f1 = creaFase(1, "Briefing", TipoFase.BRIEFING, 10);
         Fase f2 = creaFase(2, "Livello 1 - Diagnosi tecnica", TipoFase.LIVELLO, 15);
         creaFase(3, "Turbativa 1 - Scambio PM", TipoFase.TURBATIVA, 4);
         Fase f4 = creaFase(4, "Livello 2 - Decisione gestionale", TipoFase.LIVELLO, 20);
@@ -37,9 +37,35 @@ public class GameStructureSeeder implements CommandLineRunner {
         Fase f6 = creaFase(6, "Livello 4 - Ottimizzazione finale", TipoFase.LIVELLO, 20);
         creaFase(7, "Debrief", TipoFase.DEBRIEF, 25);
 
+        popolaBriefing(f1);
+
         creaModuloLivello1(f2);
         creaModuloLivello2(f4);
         creaModuloLivello4(f6);
+    }
+
+    private void popolaBriefing(Fase fase) {
+        fase.setContenutoTesto(
+                "Un cliente (NORDAUTO) ha rilevato un problema critico su un prototipo del nuovo albero di " +
+                        "trasmissione per SUV elettrici, un progetto fondamentale per loro con l'inizio della " +
+                        "produzione previsto tra 6 settimane. NORDAUTO ha comunicato che, se non troveremo un piano " +
+                        "d'azione credibile entro 48 ore, l'intero contratto sarà messo in discussione. Il direttore " +
+                        "è irraggiungibile in questo periodo e si affida completamente a voi. Avete 48 ore per " +
+                        "affrontare la situazione."
+        );
+
+        fase.setDatiJson("""
+                [
+                  {"label": "Cliente", "valore": "NORDAUTO"},
+                  {"label": "Componente", "valore": "Albero di trasmissione - prototipo SUV elettrico"},
+                  {"label": "Difetto rilevato", "valore": "Frattura riscontrata durante i test sul prototipo"},
+                  {"label": "Tempo a disposizione", "valore": "48 ore per un piano d'azione credibile"},
+                  {"label": "Avvio produzione previsto", "valore": "Tra 6 settimane"},
+                  {"label": "Rischio", "valore": "Messa in discussione dell'intero contratto NORDAUTO"}
+                ]
+                """);
+
+        faseRepository.save(fase);
     }
 
     private Fase creaFase(int ordinal, String nome, TipoFase tipo, int durata) {

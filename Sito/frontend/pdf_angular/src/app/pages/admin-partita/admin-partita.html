@@ -8,9 +8,6 @@
       <div class="header-stats">
         <p>Stato: <strong>{{ p.status }}</strong></p>
         <p>Giocatori totali: <strong>{{ p.totaleGiocatori }}</strong></p>
-        @if (p.faseAttuale) {
-          <p>Fase attuale: <strong>{{ p.faseAttuale.ordinal }}. {{ p.faseAttuale.nome }}</strong> ({{ p.faseAttuale.durataMinuti }} min)</p>
-        }
       </div>
     </header>
 
@@ -35,6 +32,46 @@
         @if (p.giocatoriSenzaGruppo.length < 5) {
           <p class="hint-text">Servono almeno 5 giocatori per avviare la partita.</p>
         }
+      </section>
+    }
+
+    @if (p.status === 'IN_CORSO' && faseCorrente(); as f) {
+      <section class="fase-section">
+        <div class="fase-section-header">
+          <div>
+            <p class="fase-label">Fase {{ f.fase?.ordinal }} di 7 — {{ f.fase?.nome }}</p>
+            <p class="fase-tipo">{{ f.fase?.tipo }}</p>
+          </div>
+          <div class="timer-block">
+            <p class="timer">{{ tempoFormattato }}</p>
+            <button type="button" class="secondary-btn" (click)="avanzaFase()" [disabled]="avanzando()">
+              @if (avanzando()) { Avanzamento... } @else { Avanza alla fase successiva → }
+            </button>
+          </div>
+        </div>
+
+        @if (f.contenutoTesto) {
+          <div class="briefing-preview">
+            <p class="briefing-text">{{ f.contenutoTesto }}</p>
+
+            @if (f.dati.length > 0) {
+              <div class="dati-grid">
+                @for (d of f.dati; track d.label) {
+                  <div class="dato-item">
+                    <p class="dato-label">{{ d.label }}</p>
+                    <p class="dato-valore">{{ d.valore }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (p.status === 'TERMINATA') {
+      <section class="fase-section">
+        <p class="fase-label">Partita terminata.</p>
       </section>
     }
 

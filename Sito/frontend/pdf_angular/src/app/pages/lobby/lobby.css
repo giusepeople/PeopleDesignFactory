@@ -140,3 +140,82 @@
   color: #ffd9d9;
   text-align: center;
 }
+
+.compact {
+  margin-top: 12px;
+  padding: 16px;
+}
+
+.briefing-card {
+  width: min(560px, 100%);
+  background: #fff;
+  color: var(--card-text);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.briefing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.fase-label {
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0;
+}
+
+.timer {
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--teal-b);
+  margin: 0;
+}
+
+.briefing-text {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+
+.dati-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dato-item {
+  background: #f5f6f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.dato-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 2px;
+  text-transform: uppercase;
+}
+
+.dato-valore {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.my-role-inline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.my-role-inline .sep {
+  margin: 0 6px;
+}

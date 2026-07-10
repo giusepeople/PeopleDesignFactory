@@ -147,3 +147,83 @@
   font-size: 13px;
   color: #ffd9d9;
 }
+
+.fase-section {
+  background: #fff;
+  color: var(--text);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.fase-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.fase-label {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+}
+
+.fase-tipo {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 2px 0 0;
+}
+
+.timer-block {
+  text-align: right;
+}
+
+.timer {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--teal-b);
+  margin: 0 0 8px;
+}
+
+.briefing-preview {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.briefing-text {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.dati-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.dato-item {
+  background: #f5f6f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.dato-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 2px;
+  text-transform: uppercase;
+}
+
+.dato-valore {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}

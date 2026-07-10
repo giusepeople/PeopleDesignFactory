@@ -4,11 +4,11 @@
 
   <main class="stage">
     @if (state(); as s) {
-      <div class="lobby-card">
-        <p class="codice-label">Codice partita</p>
-        <p class="codice">{{ s.codice }}</p>
 
-        @if (s.status === 'IN_ATTESA') {
+      @if (s.status === 'IN_ATTESA') {
+        <div class="lobby-card">
+          <p class="codice-label">Codice partita</p>
+          <p class="codice">{{ s.codice }}</p>
           <p class="status-text">In attesa che il Game Master avvii la partita...</p>
           <p class="count">{{ s.totaleGiocatori }} giocatori in lobby</p>
           <ul class="player-list">
@@ -16,34 +16,77 @@
               <li>{{ g.nickname }}</li>
             }
           </ul>
-        }
+        </div>
+      }
 
-        @if (s.status === 'IN_CORSO') {
-          @if (me; as mePlayer) {
-            <p class="status-text">Partita avviata!</p>
-            <div class="my-role-card">
-              <p class="label">Sei nel</p>
-              <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
-              <p class="label">Il tuo ruolo</p>
-              <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
-            </div>
-            @if (compagniDiGruppo.length > 0) {
+      @if (s.status === 'IN_CORSO') {
+        @if (me; as mePlayer) {
+
+          @if (faseCorrente(); as f) {
+            @if (f.fase?.tipo === 'BRIEFING') {
+              <div class="briefing-card">
+                <div class="briefing-header">
+                  <p class="fase-label">Fase {{ f.fase?.ordinal }} — {{ f.fase?.nome }}</p>
+                  <p class="timer">{{ tempoFormattato }}</p>
+                </div>
+
+                <p class="briefing-text">{{ f.contenutoTesto }}</p>
+
+                @if (f.dati.length > 0) {
+                  <div class="dati-grid">
+                    @for (d of f.dati; track d.label) {
+                      <div class="dato-item">
+                        <p class="dato-label">{{ d.label }}</p>
+                        <p class="dato-valore">{{ d.valore }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <div class="my-role-inline">
+                  <span>Gruppo {{ mePlayer.gruppoNum }}</span>
+                  <span class="sep">•</span>
+                  <span>{{ mePlayer.ruoloNome }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="lobby-card">
+                <p class="status-text">Fase {{ f.fase?.ordinal }} — {{ f.fase?.nome }}</p>
+                <p class="timer">{{ tempoFormattato }}</p>
+                <div class="my-role-card">
+                  <p class="label">Sei nel</p>
+                  <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+                  <p class="label">Il tuo ruolo</p>
+                  <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+                </div>
+              </div>
+            }
+          }
+
+          @if (compagniDiGruppo.length > 0) {
+            <div class="lobby-card compact">
               <p class="label">Compagni di squadra</p>
               <ul class="player-list">
                 @for (c of compagniDiGruppo; track c.id) {
                   <li>{{ c.nickname }} — {{ c.ruoloNome }}</li>
                 }
               </ul>
-            }
-          } @else {
-            <p class="status-text">La partita è iniziata senza di te.</p>
+            </div>
           }
-        }
 
-        @if (s.status === 'TERMINATA') {
-          <p class="status-text">Questa partita è terminata.</p>
+        } @else {
+          <div class="lobby-card">
+            <p class="status-text">La partita è iniziata senza di te.</p>
+          </div>
         }
-      </div>
+      }
+
+      @if (s.status === 'TERMINATA') {
+        <div class="lobby-card">
+          <p class="status-text">Questa partita è terminata.</p>
+        </div>
+      }
+
     }
 
     @if (errorMsg()) {
