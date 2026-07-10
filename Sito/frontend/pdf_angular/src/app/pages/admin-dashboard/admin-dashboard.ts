@@ -11,8 +11,16 @@ export class AdminDashboard {
   private gameService = inject(GameService);
 
   currentGame = signal<GameSummary | null>(null);
+  myGames = signal<GameSummary[]>([]);
   loading = signal(false);
   error = signal(false);
+
+  ngOnInit() {
+    this.gameService.getMyGames().subscribe({
+      next: (games) => this.myGames.set(games),
+      error: () => {}, // silenzioso, non blocca la creazione di una nuova partita
+    });
+  }
 
   createGame() {
     this.loading.set(true);
@@ -21,6 +29,7 @@ export class AdminDashboard {
     this.gameService.createGame().subscribe({
       next: (game) => {
         this.currentGame.set(game);
+        this.myGames.update((list) => [game, ...list]);
         this.loading.set(false);
       },
       error: () => {
@@ -28,5 +37,9 @@ export class AdminDashboard {
         this.loading.set(false);
       },
     });
+  }
+
+    resumeGame(game: GameSummary) {
+    this.currentGame.set(game);
   }
 }

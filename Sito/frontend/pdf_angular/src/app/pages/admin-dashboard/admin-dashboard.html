@@ -18,6 +18,18 @@
       <p class="error">Non sono riuscito a creare la partita. Riprova.</p>
     }
 
+    @if (!currentGame() && myGames().length > 0) {
+  <div class="games-list">
+    <p class="label">Partite recenti</p>
+    @for (game of myGames(); track game.id) {
+      <button type="button" class="game-list-item" (click)="resumeGame(game)">
+        <span class="code">{{ game.codice }}</span>
+        <span class="status">{{ game.status }}</span>
+      </button>
+    }
+  </div>
+}
+
     @if (currentGame(); as game) {
       <div class="game-code-card">
         <p class="label">Codice partita</p>

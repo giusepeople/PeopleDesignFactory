@@ -17,4 +17,8 @@ export class GameService {
   createGame(): Observable<GameSummary> {
     return this.http.post<GameSummary>(`${this.apiUrl}/games`, {});
   }
+
+  getMyGames(): Observable<GameSummary[]> {
+    return this.http.get<GameSummary[]>(`${this.apiUrl}/games`);
+  }
 }

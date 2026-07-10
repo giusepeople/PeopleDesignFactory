@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
+import java.util.List;
 
 @RestController
 @RequestMapping("/games")
@@ -43,6 +44,18 @@ public class GameController {
         return ResponseEntity.ok(
                 new CreateGameResponse(partita.getId(), partita.getCodPartita(), partita.getStatus().name())
         );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CreateGameResponse>> getMyGames(Authentication authentication) {
+        List<Partita> partite = partitaRepository
+                .findByGameMaster_NomeOrderByCreatedAtDesc(authentication.getName());
+
+        List<CreateGameResponse> response = partite.stream()
+                .map(p -> new CreateGameResponse(p.getId(), p.getCodPartita(), p.getStatus().name()))
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     private String generateUniqueCode() {
