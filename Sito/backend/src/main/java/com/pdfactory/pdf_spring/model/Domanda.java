@@ -34,7 +34,7 @@ public class Domanda {
     private String text;
 
     // solo per scelta multipla
-    @Column(name = "options_json", columnDefinition = "jsonb")
+    @Column(name = "options_json", columnDefinition = "TEXT")
     private String opzioneJson;
 
     @Column(name = "correct_option")

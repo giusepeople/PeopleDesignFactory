@@ -4,33 +4,43 @@
   </header>
 
   <main class="dashboard-content">
-    @if (!currentGame()) {
-      <button type="button" class="create-btn" (click)="createGame()" [disabled]="loading()">
-        @if (loading()) {
-          Creazione in corso...
-        } @else {
-          Nuova partita
-        }
+    @if (step() === 'loading') {
+      <p class="loading-text">Caricamento...</p>
+    }
+
+    @if (step() === 'idle') {
+      <button type="button" class="create-btn" (click)="apriAnteprima()" [disabled]="loading()">
+        @if (loading()) { Caricamento... } @else { Nuova partita }
       </button>
+    }
+
+    @if (step() === 'anteprima') {
+      <div class="struttura-preview">
+        <h2 class="preview-title">Struttura della partita</h2>
+
+        @for (fase of struttura(); track fase.id) {
+          <div class="fase-card">
+            <p class="fase-title">{{ fase.ordinal }}. {{ fase.nome }} <span class="fase-durata">({{ fase.durataMinuti }} min)</span></p>
+            @if (fase.modulo) {
+              <p class="modulo-title">{{ fase.modulo.titolo }} — {{ fase.modulo.domande.length }} domande</p>
+            }
+          </div>
+        }
+
+        <div class="preview-actions">
+          <button type="button" class="secondary-btn" (click)="annullaAnteprima()">Annulla</button>
+          <button type="button" class="create-btn" (click)="confermaCreazione()" [disabled]="loading()">
+            @if (loading()) { Creazione in corso... } @else { Conferma e crea partita }
+          </button>
+        </div>
+      </div>
     }
 
     @if (error()) {
-      <p class="error">Non sono riuscito a creare la partita. Riprova.</p>
+      <p class="error">Si è verificato un errore. Riprova.</p>
     }
 
-    @if (!currentGame() && myGames().length > 0) {
-  <div class="games-list">
-    <p class="label">Partite recenti</p>
-    @for (game of myGames(); track game.id) {
-      <button type="button" class="game-list-item" (click)="resumeGame(game)">
-        <span class="code">{{ game.codice }}</span>
-        <span class="status">{{ game.status }}</span>
-      </button>
-    }
-  </div>
-}
-
-    @if (currentGame(); as game) {
+    @if (step() === 'creata' && currentGame(); as game) {
       <div class="game-code-card">
         <p class="label">Codice partita</p>
         <p class="code">{{ game.codice }}</p>

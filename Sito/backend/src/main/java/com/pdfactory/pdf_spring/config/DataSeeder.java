@@ -3,10 +3,12 @@ package com.pdfactory.pdf_spring.config;
 import com.pdfactory.pdf_spring.model.GameMaster;
 import com.pdfactory.pdf_spring.repository.GameMasterRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(1)
 public class DataSeeder implements CommandLineRunner {
 
     private final GameMasterRepository gameMasterRepository;

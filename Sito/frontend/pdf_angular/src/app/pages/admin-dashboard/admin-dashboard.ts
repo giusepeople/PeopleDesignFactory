@@ -1,5 +1,5 @@
-import { Component, signal, inject } from '@angular/core';
-import { GameService, GameSummary } from '../../core/game.service';
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { GameService, GameSummary, FaseSummary } from '../../core/game.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -7,29 +7,41 @@ import { GameService, GameSummary } from '../../core/game.service';
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-export class AdminDashboard {
+export class AdminDashboard implements OnInit {
   private gameService = inject(GameService);
 
+  step = signal<'loading' | 'idle' | 'anteprima' | 'creata'>('loading');
   currentGame = signal<GameSummary | null>(null);
-  myGames = signal<GameSummary[]>([]);
+  struttura = signal<FaseSummary[]>([]);
   loading = signal(false);
   error = signal(false);
 
   ngOnInit() {
     this.gameService.getMyGames().subscribe({
-      next: (games) => this.myGames.set(games),
-      error: () => {}, // silenzioso, non blocca la creazione di una nuova partita
+      next: (games) => {
+        const partitaAttiva = games.find((g) => g.status !== 'TERMINATA');
+        if (partitaAttiva) {
+          this.currentGame.set(partitaAttiva);
+          this.step.set('creata');
+        } else {
+          this.step.set('idle');
+        }
+      },
+      error: () => {
+        // se il fetch fallisce non blocchiamo il GM: puo' comunque crearne una nuova
+        this.step.set('idle');
+      },
     });
   }
 
-  createGame() {
+  apriAnteprima() {
     this.loading.set(true);
     this.error.set(false);
 
-    this.gameService.createGame().subscribe({
-      next: (game) => {
-        this.currentGame.set(game);
-        this.myGames.update((list) => [game, ...list]);
+    this.gameService.getStruttura().subscribe({
+      next: (fasi) => {
+        this.struttura.set(fasi);
+        this.step.set('anteprima');
         this.loading.set(false);
       },
       error: () => {
@@ -39,7 +51,24 @@ export class AdminDashboard {
     });
   }
 
-    resumeGame(game: GameSummary) {
-    this.currentGame.set(game);
+  annullaAnteprima() {
+    this.step.set('idle');
+  }
+
+  confermaCreazione() {
+    this.loading.set(true);
+    this.error.set(false);
+
+    this.gameService.createGame().subscribe({
+      next: (game) => {
+        this.currentGame.set(game);
+        this.step.set('creata');
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set(true);
+        this.loading.set(false);
+      },
+    });
   }
 }
