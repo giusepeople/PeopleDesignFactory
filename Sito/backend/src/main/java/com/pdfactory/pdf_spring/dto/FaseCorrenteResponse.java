@@ -9,5 +9,6 @@ public record FaseCorrenteResponse(
         Instant faseIniziataIl,
         Long secondiRimanenti,
         String contenutoTesto,
-        List<DatoBriefingDTO> dati
+        List<DatoBriefingDTO> dati,
+        Instant serverTimestamp
 ) {}

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { GameService, LobbyState, FaseCorrenteResponse } from '../../core/game.service';
-import { formatSecondi } from '../../core/countdown.util';
+import { formatSecondi, CountdownSync } from '../../core/countdown.util';
 
 interface PlayerSession {
   giocatoreId: string;
@@ -27,6 +27,7 @@ export class Lobby implements OnInit, OnDestroy {
   errorMsg = signal('');
   secondiVisualizzati = signal<number | null>(null);
 
+  private countdown = new CountdownSync();
   private pollHandle: ReturnType<typeof setInterval> | undefined;
   private tickHandle: ReturnType<typeof setInterval> | undefined;
 
@@ -60,17 +61,15 @@ export class Lobby implements OnInit, OnDestroy {
     this.gameService.getFaseCorrente(this.partitaId).subscribe({
       next: (f) => {
         this.faseCorrente.set(f);
-        this.secondiVisualizzati.set(f.secondiRimanenti);
+        this.countdown.aggiorna(f.faseIniziataIl, f.fase?.durataMinuti, f.serverTimestamp);
+        this.secondiVisualizzati.set(this.countdown.secondiRimanenti());
       },
       error: () => {},
     });
   }
 
   private tick() {
-    const attuale = this.secondiVisualizzati();
-    if (attuale !== null && attuale > 0) {
-      this.secondiVisualizzati.set(attuale - 1);
-    }
+    this.secondiVisualizzati.set(this.countdown.secondiRimanenti());
   }
 
   get tempoFormattato(): string {

@@ -364,6 +364,8 @@ public class GameController {
         String contenuto = null;
         List<DatoBriefingDTO> dati = List.of();
 
+        Instant adesso = Instant.now();
+
         if (fase != null) {
             faseDto = new FaseCorrenteDTO(fase.getId(), fase.getOrdinal(), fase.getNome(),
                     fase.getTipo().name(), fase.getDefaultDurataMinuti());
@@ -372,13 +374,14 @@ public class GameController {
 
             if (partita.getFaseIniziataIl() != null) {
                 long durataSec = fase.getDefaultDurataMinuti() * 60L;
-                long trascorsi = Instant.now().getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
+                long trascorsi = adesso.getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
                 secondiRimanenti = Math.max(0, durataSec - trascorsi);
             }
         }
 
         return new FaseCorrenteResponse(
-                partita.getStatus().name(), faseDto, partita.getFaseIniziataIl(), secondiRimanenti, contenuto, dati
+                partita.getStatus().name(), faseDto, partita.getFaseIniziataIl(), secondiRimanenti, contenuto, dati,
+                adesso
         );
     }
 

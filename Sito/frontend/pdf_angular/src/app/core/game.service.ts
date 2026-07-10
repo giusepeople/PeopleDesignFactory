@@ -98,6 +98,7 @@ export interface FaseCorrenteResponse {
   secondiRimanenti: number | null;
   contenutoTesto: string | null;
   dati: DatoBriefing[];
+  serverTimestamp: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
