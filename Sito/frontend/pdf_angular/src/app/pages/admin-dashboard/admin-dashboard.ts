@@ -1,4 +1,5 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { GameService, GameSummary, FaseSummary } from '../../core/game.service';
 
 @Component({
@@ -9,29 +10,34 @@ import { GameService, GameSummary, FaseSummary } from '../../core/game.service';
 })
 export class AdminDashboard implements OnInit {
   private gameService = inject(GameService);
+  private router = inject(Router);
 
-  step = signal<'loading' | 'idle' | 'anteprima' | 'creata'>('loading');
-  currentGame = signal<GameSummary | null>(null);
+  step = signal<'loading' | 'lista' | 'anteprima'>('loading');
+  games = signal<GameSummary[]>([]);
   struttura = signal<FaseSummary[]>([]);
   loading = signal(false);
   error = signal(false);
 
   ngOnInit() {
+    this.caricaPartite();
+  }
+
+  caricaPartite() {
+    this.step.set('loading');
     this.gameService.getMyGames().subscribe({
       next: (games) => {
-        const partitaAttiva = games.find((g) => g.status !== 'TERMINATA');
-        if (partitaAttiva) {
-          this.currentGame.set(partitaAttiva);
-          this.step.set('creata');
-        } else {
-          this.step.set('idle');
-        }
+        this.games.set(games);
+        this.step.set('lista');
       },
       error: () => {
-        // se il fetch fallisce non blocchiamo il GM: puo' comunque crearne una nuova
-        this.step.set('idle');
+        this.error.set(true);
+        this.step.set('lista');
       },
     });
+  }
+
+  apriPannello(id: string) {
+    this.router.navigate(['/admin/partita', id]);
   }
 
   apriAnteprima() {
@@ -52,7 +58,7 @@ export class AdminDashboard implements OnInit {
   }
 
   annullaAnteprima() {
-    this.step.set('idle');
+    this.step.set('lista');
   }
 
   confermaCreazione() {
@@ -61,9 +67,8 @@ export class AdminDashboard implements OnInit {
 
     this.gameService.createGame().subscribe({
       next: (game) => {
-        this.currentGame.set(game);
-        this.step.set('creata');
         this.loading.set(false);
+        this.router.navigate(['/admin/partita', game.id]);
       },
       error: () => {
         this.error.set(true);

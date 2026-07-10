@@ -1,0 +1,53 @@
+<div class="page">
+  <div class="bg-shape bg-shape--a" aria-hidden="true"></div>
+  <div class="bg-shape bg-shape--b" aria-hidden="true"></div>
+
+  <main class="stage">
+    @if (state(); as s) {
+      <div class="lobby-card">
+        <p class="codice-label">Codice partita</p>
+        <p class="codice">{{ s.codice }}</p>
+
+        @if (s.status === 'IN_ATTESA') {
+          <p class="status-text">In attesa che il Game Master avvii la partita...</p>
+          <p class="count">{{ s.totaleGiocatori }} giocatori in lobby</p>
+          <ul class="player-list">
+            @for (g of s.giocatori; track g.id) {
+              <li>{{ g.nickname }}</li>
+            }
+          </ul>
+        }
+
+        @if (s.status === 'IN_CORSO') {
+          @if (me; as mePlayer) {
+            <p class="status-text">Partita avviata!</p>
+            <div class="my-role-card">
+              <p class="label">Sei nel</p>
+              <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+              <p class="label">Il tuo ruolo</p>
+              <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+            </div>
+            @if (compagniDiGruppo.length > 0) {
+              <p class="label">Compagni di squadra</p>
+              <ul class="player-list">
+                @for (c of compagniDiGruppo; track c.id) {
+                  <li>{{ c.nickname }} — {{ c.ruoloNome }}</li>
+                }
+              </ul>
+            }
+          } @else {
+            <p class="status-text">La partita è iniziata senza di te.</p>
+          }
+        }
+
+        @if (s.status === 'TERMINATA') {
+          <p class="status-text">Questa partita è terminata.</p>
+        }
+      </div>
+    }
+
+    @if (errorMsg()) {
+      <p class="field-error">{{ errorMsg() }}</p>
+    }
+  </main>
+</div>

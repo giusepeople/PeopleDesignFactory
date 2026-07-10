@@ -2,7 +2,6 @@ package com.pdfactory.pdf_spring.model;
 
 import com.pdfactory.pdf_spring.enums.StatoGioco;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,6 +46,10 @@ public class Partita
 
     @Column(name = "ended_at")
     private Instant endedAt;
+
+    // timestamp di inizio della fase corrente, usato per calcolare il tempo residuo
+    @Column(name = "fase_iniziata_il")
+    private Instant faseIniziataIl;
 
     @OneToMany(mappedBy = "partita", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Gruppo> gruppi = new ArrayList<>();

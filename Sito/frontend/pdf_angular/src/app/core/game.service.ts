@@ -30,6 +30,62 @@ export interface FaseSummary {
   modulo: ModuloSummary | null;
 }
 
+export interface JoinResponse {
+  giocatoreId: string;
+  partitaId: string;
+  sessionToken: string;
+  nickname: string;
+}
+
+export interface GiocatoreLobby {
+  id: string;
+  nickname: string;
+  gruppoNum: number | null;
+  ruoloNome: string | null;
+  ruoloCodice: string | null;
+}
+
+export interface LobbyState {
+  partitaId: string;
+  codice: string;
+  status: string;
+  totaleGiocatori: number;
+  giocatori: GiocatoreLobby[];
+}
+
+export interface GiocatoreDettaglio {
+  id: string;
+  nickname: string;
+  ruoloNome: string | null;
+  ruoloCodice: string | null;
+}
+
+export interface GruppoDettaglio {
+  id: string;
+  teamNum: number;
+  stato: string;
+  giocatori: GiocatoreDettaglio[];
+}
+
+export interface FaseCorrente {
+  id: string;
+  ordinal: number;
+  nome: string;
+  tipo: string;
+  durataMinuti: number;
+}
+
+export interface PannelloControllo {
+  id: string;
+  codice: string;
+  status: string;
+  totaleGiocatori: number;
+  faseAttuale: FaseCorrente | null;
+  faseIniziataIl: string | null;
+  gruppi: GruppoDettaglio[];
+  giocatoriSenzaGruppo: GiocatoreDettaglio[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GameService {
   private readonly apiUrl = 'http://localhost:8080';
@@ -46,5 +102,21 @@ export class GameService {
 
   getMyGames(): Observable<GameSummary[]> {
     return this.http.get<GameSummary[]>(`${this.apiUrl}/games`);
+  }
+
+  joinGame(codice: string, nickname: string): Observable<JoinResponse> {
+    return this.http.post<JoinResponse>(`${this.apiUrl}/games/join`, { codice, nickname });
+  }
+
+  getState(partitaId: string): Observable<LobbyState> {
+    return this.http.get<LobbyState>(`${this.apiUrl}/games/${partitaId}/state`);
+  }
+
+  avviaPartita(partitaId: string): Observable<PannelloControllo> {
+    return this.http.post<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/avvia`, {});
+  }
+
+  getPannello(partitaId: string): Observable<PannelloControllo> {
+    return this.http.get<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/pannello`);
   }
 }

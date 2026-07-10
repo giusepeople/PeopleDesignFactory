@@ -24,13 +24,28 @@
         (keydown.enter)="joinGame()"
         aria-label="Codice partita"
       />
-      <button type="button" class="join-btn" (click)="joinGame()">
-        Conferma
+      <input
+        class="pin-input"
+        type="text"
+        maxlength="30"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Il tuo nome"
+        [value]="nickname()"
+        (input)="onNicknameInput($event)"
+        (keydown.enter)="joinGame()"
+        aria-label="Il tuo nome"
+      />
+      <button type="button" class="join-btn" (click)="joinGame()" [disabled]="joining()">
+        @if (joining()) { Entrata in corso... } @else { Conferma }
       </button>
     </div>
 
     @if (pinError()) {
-      <p class="field-error">Serve un codice di almeno 4 caratteri.</p>
+      <p class="field-error">Inserisci un codice di almeno 4 caratteri e il tuo nome.</p>
+    }
+    @if (joinErrorMsg()) {
+      <p class="field-error">{{ joinErrorMsg() }}</p>
     }
   </main>
 

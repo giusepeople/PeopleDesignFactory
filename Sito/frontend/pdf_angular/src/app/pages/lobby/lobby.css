@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
+
+:host {
+  --teal-a: #0b4f45;
+  --teal-b: #17876b;
+  --card-text: #202325;
+  --text-muted: #6c7378;
+  --border: #dde1e2;
+  --error: #d64545;
+
+  display: block;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(160deg, var(--teal-a) 0%, var(--teal-b) 100%);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.bg-shape--a {
+  width: 60vmax;
+  height: 60vmax;
+  right: -20vmax;
+  top: -25vmax;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.1), transparent 70%);
+}
+
+.bg-shape--b {
+  width: 45vmax;
+  height: 45vmax;
+  left: -18vmax;
+  bottom: -20vmax;
+  background: radial-gradient(circle at 60% 60%, rgba(0, 0, 0, 0.16), transparent 70%);
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lobby-card {
+  width: min(420px, 100%);
+  background: #fff;
+  color: var(--card-text);
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.codice-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+
+.codice {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0 0 16px;
+}
+
+.status-text {
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.count {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.player-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  text-align: left;
+}
+
+.player-list li {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.player-list li:last-child {
+  border-bottom: none;
+}
+
+.my-role-card {
+  background: #f5f6f6;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 8px 0 2px;
+}
+
+.gruppo-num,
+.ruolo-nome {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.field-error {
+  font-weight: 600;
+  font-size: 13px;
+  color: #ffd9d9;
+  text-align: center;
+}

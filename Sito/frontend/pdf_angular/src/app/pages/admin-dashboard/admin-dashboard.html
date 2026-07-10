@@ -8,10 +8,28 @@
       <p class="loading-text">Caricamento...</p>
     }
 
-    @if (step() === 'idle') {
+    @if (step() === 'lista') {
       <button type="button" class="create-btn" (click)="apriAnteprima()" [disabled]="loading()">
-        @if (loading()) { Caricamento... } @else { Nuova partita }
+        @if (loading()) { Caricamento... } @else { + Nuova partita }
       </button>
+
+      @if (games().length > 0) {
+        <div class="games-list">
+          @for (game of games(); track game.id) {
+            <div class="game-card">
+              <div class="game-card-info">
+                <p class="game-code">{{ game.codice }}</p>
+                <p class="game-status">Stato: {{ game.status }}</p>
+              </div>
+              <button type="button" class="secondary-btn" (click)="apriPannello(game.id)">
+                Apri pannello di controllo
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="empty-text">Non hai ancora creato nessuna partita.</p>
+      }
     }
 
     @if (step() === 'anteprima') {
@@ -38,14 +56,6 @@
 
     @if (error()) {
       <p class="error">Si è verificato un errore. Riprova.</p>
-    }
-
-    @if (step() === 'creata' && currentGame(); as game) {
-      <div class="game-code-card">
-        <p class="label">Codice partita</p>
-        <p class="code">{{ game.codice }}</p>
-        <p class="status">Stato: {{ game.status }}</p>
-      </div>
     }
   </main>
 </div>

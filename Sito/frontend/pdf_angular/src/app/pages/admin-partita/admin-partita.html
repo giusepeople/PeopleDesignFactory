@@ -1,0 +1,63 @@
+<div class="panel">
+  @if (pannello(); as p) {
+    <header class="panel-header">
+      <div>
+        <p class="codice-label">Codice</p>
+        <p class="codice">{{ p.codice }}</p>
+      </div>
+      <div class="header-stats">
+        <p>Stato: <strong>{{ p.status }}</strong></p>
+        <p>Giocatori totali: <strong>{{ p.totaleGiocatori }}</strong></p>
+        @if (p.faseAttuale) {
+          <p>Fase attuale: <strong>{{ p.faseAttuale.ordinal }}. {{ p.faseAttuale.nome }}</strong> ({{ p.faseAttuale.durataMinuti }} min)</p>
+        }
+      </div>
+    </header>
+
+    @if (p.status === 'IN_ATTESA') {
+      <section class="waiting-section">
+        <h2>Giocatori in attesa ({{ p.giocatoriSenzaGruppo.length }})</h2>
+        <ul class="player-list">
+          @for (g of p.giocatoriSenzaGruppo; track g.id) {
+            <li>{{ g.nickname }}</li>
+          }
+        </ul>
+
+        <button
+          type="button"
+          class="create-btn"
+          (click)="avviaPartita()"
+          [disabled]="avviando() || p.giocatoriSenzaGruppo.length < 5"
+        >
+          @if (avviando()) { Avvio in corso... } @else { Avvia partita e forma i gruppi }
+        </button>
+
+        @if (p.giocatoriSenzaGruppo.length < 5) {
+          <p class="hint-text">Servono almeno 5 giocatori per avviare la partita.</p>
+        }
+      </section>
+    }
+
+    @if (p.gruppi.length > 0) {
+      <section class="groups-section">
+        <h2>Gruppi ({{ p.gruppi.length }})</h2>
+        <div class="groups-grid">
+          @for (gruppo of p.gruppi; track gruppo.id) {
+            <div class="group-card">
+              <p class="group-title">Gruppo {{ gruppo.teamNum }} <span class="group-status">{{ gruppo.stato }}</span></p>
+              <ul class="player-list">
+                @for (membro of gruppo.giocatori; track membro.id) {
+                  <li>{{ membro.nickname }} — <span class="ruolo-tag">{{ membro.ruoloNome }}</span></li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  @if (errorMsg()) {
+    <p class="field-error">{{ errorMsg() }}</p>
+  }
+</div>
