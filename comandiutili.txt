@@ -1,0 +1,8 @@
+//CANCELLARE TUTTO IL DB E LE INFO
+
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+
+
+-----------
