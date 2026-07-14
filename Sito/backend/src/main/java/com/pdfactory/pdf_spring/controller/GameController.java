@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.pdfactory.pdf_spring.enums.StatoTeam;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -150,6 +151,43 @@ public class GameController {
         ));
     }
 
+    @PostMapping("/{id}/pronto")
+    public ResponseEntity<?> segnalaPronto(@PathVariable UUID id, @RequestBody MarcaProntoRequest request) {
+        Partita partita = partitaRepository.findById(id).orElse(null);
+        if (partita == null) {
+            return ResponseEntity.status(404).body("Partita non trovata");
+        }
+
+        if (partita.getStatus() != StatoGioco.IN_CORSO) {
+            return ResponseEntity.status(409).body("La partita non è in corso");
+        }
+
+        if (request.giocatoreId() == null || request.sessionToken() == null) {
+            return ResponseEntity.badRequest().body("Sessione mancante");
+        }
+
+        Giocatore giocatore = giocatoreRepository.findById(request.giocatoreId()).orElse(null);
+        if (giocatore == null
+                || !giocatore.getPartita().getId().equals(id)
+                || !giocatore.getSessionToken().equals(request.sessionToken())) {
+            return ResponseEntity.status(403).body("Sessione non valida");
+        }
+
+        if (giocatore.getRuolo() == null || !"PM".equals(giocatore.getRuolo().getCodice())) {
+            return ResponseEntity.status(403).body("Solo il Project Manager può segnalare che il gruppo è pronto");
+        }
+
+        Gruppo gruppo = giocatore.getGruppo();
+        if (gruppo == null) {
+            return ResponseEntity.status(400).body("Non fai ancora parte di un gruppo");
+        }
+
+        gruppo.setStato(StatoTeam.PRONTO);
+        gruppoRepository.save(gruppo);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}/state")
     public ResponseEntity<?> getState(@PathVariable UUID id) {
         Partita partita = partitaRepository.findById(id).orElse(null);
@@ -169,8 +207,12 @@ public class GameController {
                 ))
                 .toList();
 
+        List<GruppoStatoDTO> gruppiStato = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(id).stream()
+                .map(gr -> new GruppoStatoDTO(gr.getId(), gr.getTeamNum(), gr.getStato().name()))
+                .toList();
+
         return ResponseEntity.ok(new LobbyStateResponse(
-                partita.getId(), partita.getCodPartita(), partita.getStatus().name(), giocatori.size(), dto
+                partita.getId(), partita.getCodPartita(), partita.getStatus().name(), giocatori.size(), dto, gruppiStato
         ));
     }
 
@@ -287,9 +329,11 @@ public class GameController {
             faseDto = new FaseCorrenteDTO(f.getId(), f.getOrdinal(), f.getNome(), f.getTipo().name(), f.getDefaultDurataMinuti());
         }
 
+        boolean tuttiPronti = !gruppi.isEmpty() && gruppi.stream().allMatch(g -> g.getStato() == StatoTeam.PRONTO);
+
         return new PannelloControlloResponse(
                 partita.getId(), partita.getCodPartita(), partita.getStatus().name(),
-                tutti.size(), faseDto, partita.getFaseIniziataIl(), gruppiDto, senzaGruppo
+                tutti.size(), faseDto, partita.getFaseIniziataIl(), gruppiDto, senzaGruppo, tuttiPronti
         );
     }
 
@@ -352,6 +396,11 @@ public class GameController {
         }
 
         partitaRepository.save(partita);
+
+        // reset dello stato "pronto" dei gruppi in vista del prossimo round
+        List<Gruppo> gruppi = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(id);
+        gruppi.forEach(g -> g.setStato(StatoTeam.LAVORANDO));
+        gruppoRepository.saveAll(gruppi);
 
         return ResponseEntity.ok(buildPannello(partita));
     }

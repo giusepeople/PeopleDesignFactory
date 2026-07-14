@@ -2,10 +2,11 @@ import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { GameService, PannelloControllo, FaseCorrenteResponse } from '../../core/game.service';
 import { formatSecondi, CountdownSync } from '../../core/countdown.util';
+import { InfoPanel } from '../../core/components/info-panel/info-panel';
 
 @Component({
   selector: 'app-admin-partita',
-  imports: [],
+  imports: [InfoPanel],
   templateUrl: './admin-partita.html',
   styleUrl: './admin-partita.css',
 })
@@ -20,6 +21,9 @@ export class AdminPartita implements OnInit, OnDestroy {
   avviando = signal(false);
   avanzando = signal(false);
   secondiVisualizzati = signal<number | null>(null);
+
+  // conferma avanzamento con gruppi non pronti
+  showConfermaAvanza = signal(false);
 
   private countdown = new CountdownSync();
   private pollHandle: ReturnType<typeof setInterval> | undefined;
@@ -63,6 +67,29 @@ export class AdminPartita implements OnInit, OnDestroy {
     return formatSecondi(this.secondiVisualizzati());
   }
 
+  get gruppiPronti(): number {
+    return this.pannello()?.gruppi.filter((g) => g.stato === 'PRONTO').length ?? 0;
+  }
+
+  get totaleGruppi(): number {
+    return this.pannello()?.gruppi.length ?? 0;
+  }
+
+  get gruppiNonPronti(): string[] {
+    return (this.pannello()?.gruppi ?? [])
+      .filter((g) => g.stato !== 'PRONTO')
+      .map((g) => `Gruppo ${g.teamNum} (${this.etichettaStato(g.stato)})`);
+  }
+
+  private etichettaStato(stato: string): string {
+    switch (stato) {
+      case 'LAVORANDO': return 'sta lavorando';
+      case 'INVIATO': return 'in attesa di revisione';
+      case 'RIFIUTATO': return 'modulo rifiutato';
+      default: return stato;
+    }
+  }
+
   avviaPartita() {
     this.avviando.set(true);
     this.errorMsg.set('');
@@ -80,7 +107,24 @@ export class AdminPartita implements OnInit, OnDestroy {
     });
   }
 
-  avanzaFase() {
+  richiediAvanzaFase() {
+    if (this.pannello()?.tuttiGruppiPronti) {
+      this.avanzaFase();
+    } else {
+      this.showConfermaAvanza.set(true);
+    }
+  }
+
+  annullaAvanzaFase() {
+    this.showConfermaAvanza.set(false);
+  }
+
+  confermaAvanzaFase() {
+    this.showConfermaAvanza.set(false);
+    this.avanzaFase();
+  }
+
+  private avanzaFase() {
     this.avanzando.set(true);
     this.errorMsg.set('');
 

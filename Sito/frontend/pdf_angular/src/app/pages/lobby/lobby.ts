@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GameService, LobbyState, FaseCorrenteResponse } from '../../core/game.service';
+import { GameService, LobbyState, FaseCorrenteResponse, Ruolo } from '../../core/game.service';
 import { formatSecondi, CountdownSync } from '../../core/countdown.util';
+import { InfoPanel } from '../../core/components/info-panel/info-panel';
 
 interface PlayerSession {
   giocatoreId: string;
@@ -10,9 +11,11 @@ interface PlayerSession {
   nickname: string;
 }
 
+const ORDINE_RUOLI = ['PM', 'SENIOR', 'JUNIOR', 'QA', 'MANUFACTURING'];
+
 @Component({
   selector: 'app-lobby',
-  imports: [],
+  imports: [InfoPanel],
   templateUrl: './lobby.html',
   styleUrl: './lobby.css',
 })
@@ -26,6 +29,9 @@ export class Lobby implements OnInit, OnDestroy {
   faseCorrente = signal<FaseCorrenteResponse | null>(null);
   errorMsg = signal('');
   secondiVisualizzati = signal<number | null>(null);
+
+  ruoli = signal<Ruolo[]>([]);
+  inviandoPronto = signal(false);
 
   private countdown = new CountdownSync();
   private pollHandle: ReturnType<typeof setInterval> | undefined;
@@ -41,6 +47,16 @@ export class Lobby implements OnInit, OnDestroy {
         this.session.set(parsed);
       }
     }
+
+    this.gameService.getRuoli().subscribe({
+      next: (ruoli) => {
+        const ordinati = [...ruoli].sort(
+          (a, b) => ORDINE_RUOLI.indexOf(a.codice) - ORDINE_RUOLI.indexOf(b.codice)
+        );
+        this.ruoli.set(ordinati);
+      },
+      error: () => {},
+    });
 
     this.refresh();
     this.pollHandle = setInterval(() => this.refresh(), 4000);
@@ -88,5 +104,51 @@ export class Lobby implements OnInit, OnDestroy {
     const st = this.state();
     if (!meG || !st || meG.gruppoNum == null) return [];
     return st.giocatori.filter((g) => g.gruppoNum === meG.gruppoNum && g.id !== meG.id);
+  }
+
+  get mioGruppoStato(): string | null {
+    const meG = this.me;
+    const st = this.state();
+    if (!meG || !st || meG.gruppoNum == null) return null;
+    return st.gruppi.find((g) => g.teamNum === meG.gruppoNum)?.stato ?? null;
+  }
+
+  get sonoPM(): boolean {
+    return this.me?.ruoloCodice === 'PM';
+  }
+
+  get gruppiPronti(): number {
+    return this.state()?.gruppi.filter((g) => g.stato === 'PRONTO').length ?? 0;
+  }
+
+  get totaleGruppi(): number {
+    return this.state()?.gruppi.length ?? 0;
+  }
+
+  segnalaPronto() {
+    const sess = this.session();
+    if (!sess) return;
+
+    this.inviandoPronto.set(true);
+    this.gameService.segnalaPronto(this.partitaId, sess.giocatoreId, sess.sessionToken).subscribe({
+      next: () => {
+        this.inviandoPronto.set(false);
+        this.refresh();
+      },
+      error: (err) => {
+        this.inviandoPronto.set(false);
+        this.errorMsg.set(err.error ?? 'Impossibile segnalare che il gruppo è pronto.');
+      },
+    });
+  }
+
+  bulletList(testo: string | null | undefined): string[] {
+    if (!testo) return [];
+    return testo.split('\n').filter((riga) => riga.trim().length > 0);
+  }
+
+  paragrafi(testo: string | null | undefined): string[] {
+    if (!testo) return [];
+    return testo.split('\n\n').filter((p) => p.trim().length > 0);
   }
 }

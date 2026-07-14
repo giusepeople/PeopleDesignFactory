@@ -46,24 +46,36 @@ public class GameStructureSeeder implements CommandLineRunner {
 
     private void popolaBriefing(Fase fase) {
         fase.setContenutoTesto(
-                "Un cliente (NORDAUTO) ha rilevato un problema critico su un prototipo del nuovo albero di " +
-                        "trasmissione per SUV elettrici, un progetto fondamentale per loro con l'inizio della " +
-                        "produzione previsto tra 6 settimane. NORDAUTO ha comunicato che, se non troveremo un piano " +
-                        "d'azione credibile entro 48 ore, l'intero contratto sarà messo in discussione. Il direttore " +
-                        "è irraggiungibile in questo periodo e si affida completamente a voi. Avete 48 ore per " +
-                        "affrontare la situazione."
+                "Siete il team di progettazione di PEOPLE DESIGN Factory, una PMI meccanica italiana che " +
+                        "produce sistemi di trasmissione per il settore automotive e machinery. L'azienda ha " +
+                        "120 dipendenti, un ufficio tecnico di 15 persone e lavora principalmente per clienti " +
+                        "OEM tedeschi e nordici.\n\n" +
+                        "Tre giorni fa, il cliente NORDAUTO AG (principale cliente, 35% del fatturato) ha " +
+                        "rilevato un problema critico sul prototipo del nuovo albero di trasmissione per SUV " +
+                        "elettrici — il progetto più importante degli ultimi 5 anni. Il lancio in produzione è " +
+                        "previsto tra 6 settimane.\n\n" +
+                        "NORDAUTO ha inviato questa mattina una mail formale: se entro 48 ore non ricevono " +
+                        "un'analisi della causa del problema e un piano di azione credibile, metteranno in " +
+                        "discussione l'intero contratto (valore: 2,3 milioni di euro/anno).\n\n" +
+                        "Il vostro capo, Direttore Tecnico Ing. Moretti, è in aeroporto per un volo d'emergenza " +
+                        "verso Monaco. Prima di imbarcarsi, vi ha chiamato e ha detto solo: \"Ragazzi, mi fido " +
+                        "di voi. Avete 48 ore. Fate funzionare l'ufficio tecnico come se fossi io ad essere lì.\"\n\n" +
+                        "Il gioco inizia adesso. Ogni livello che superate vi avvicina alla soluzione. Ogni " +
+                        "livello bloccato vi avvicina alla crisi."
         );
 
         fase.setDatiJson("""
-                [
-                  {"label": "Cliente", "valore": "NORDAUTO"},
-                  {"label": "Componente", "valore": "Albero di trasmissione - prototipo SUV elettrico"},
-                  {"label": "Difetto rilevato", "valore": "Frattura riscontrata durante i test sul prototipo"},
-                  {"label": "Tempo a disposizione", "valore": "48 ore per un piano d'azione credibile"},
-                  {"label": "Avvio produzione previsto", "valore": "Tra 6 settimane"},
-                  {"label": "Rischio", "valore": "Messa in discussione dell'intero contratto NORDAUTO"}
-                ]
-                """);
+            [
+              {"label": "Componente", "valore": "Albero di Trasmissione AT-7X"},
+              {"label": "Applicazione", "valore": "Trasmissione per SUV elettrico premium (segmento D)"},
+              {"label": "Materiale", "valore": "Acciaio 42CrMo4 bonificato (presunta, da verificare)"},
+              {"label": "Trattamento", "valore": "Tempra ad induzione sulla sede dei cuscinetti"},
+              {"label": "Diametro nominale", "valore": "Ø45 mm sul tratto principale, Ø32 mm sui tratti ridotti"},
+              {"label": "Coppia max trasmessa", "valore": "650 Nm (picco EV: 900 Nm)"},
+              {"label": "Problema riscontrato", "valore": "Cricca superficiale rilevata con liquidi penetranti nella zona di raccordo R3 tra il tratto Ø45 e Ø32"},
+              {"label": "Ore di test al rilevamento", "valore": "1.840 h (su 5.000 h richieste dal capitolato)"}
+            ]
+            """);
 
         faseRepository.save(fase);
     }

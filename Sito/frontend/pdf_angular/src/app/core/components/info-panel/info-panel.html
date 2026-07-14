@@ -1,0 +1,33 @@
+@if (aperto()) {
+  <div class="info-backdrop" (click)="chiudi()">
+    <div class="info-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="info-close" (click)="chiudi()" aria-label="Chiudi">✕</button>
+
+      <h2 class="info-title">Guida al gioco</h2>
+      <p class="info-text">
+        <strong>PEOPLE DESIGN FACTORY – RED LINE</strong> è un'esperienza di simulazione immersiva
+        pensata per ingegneri meccanici quasi laureati. Attraverso 4 livelli progressivi, affronterete
+        sfide tecniche e gestionali che vi aiuteranno a capire dove vi sentite più a vostro agio: nella
+        progettazione tecnica o nella gestione di team e processi.
+      </p>
+      <p class="info-text info-highlight">
+        Non esiste un risultato "giusto" o "sbagliato". L'obiettivo è l'autoconoscenza.
+      </p>
+
+      <h2 class="info-title">Struttura della sessione</h2>
+      <div class="struttura-table">
+        <div class="struttura-row struttura-head">
+          <span>Fase</span><span>Durata</span><span>Attività</span><span>Obiettivo</span>
+        </div>
+        @for (riga of strutturaSessione; track riga.fase) {
+          <div class="struttura-row">
+            <span>{{ riga.fase }}</span>
+            <span>{{ riga.durata }}</span>
+            <span>{{ riga.attivita }}</span>
+            <span>{{ riga.obiettivo }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

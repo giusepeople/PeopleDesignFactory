@@ -12,5 +12,6 @@ public record PannelloControlloResponse(
         FaseCorrenteDTO faseAttuale,
         Instant faseIniziataIl,
         List<GruppoDettaglioDTO> gruppi,
-        List<GiocatoreDettaglioDTO> giocatoriSenzaGruppo
+        List<GiocatoreDettaglioDTO> giocatoriSenzaGruppo,
+        boolean tuttiGruppiPronti
 ) {}

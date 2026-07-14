@@ -51,6 +51,7 @@ export interface LobbyState {
   status: string;
   totaleGiocatori: number;
   giocatori: GiocatoreLobby[];
+  gruppi: GruppoStato[];
 }
 
 export interface GiocatoreDettaglio {
@@ -84,6 +85,7 @@ export interface PannelloControllo {
   faseIniziataIl: string | null;
   gruppi: GruppoDettaglio[];
   giocatoriSenzaGruppo: GiocatoreDettaglio[];
+  tuttiGruppiPronti: boolean;
 }
 
 export interface DatoBriefing {
@@ -99,6 +101,22 @@ export interface FaseCorrenteResponse {
   contenutoTesto: string | null;
   dati: DatoBriefing[];
   serverTimestamp: string | null;
+}
+
+export interface Ruolo {
+  id: string;
+  codice: string;
+  nome: string;
+  missione: string;
+  competenze: string;
+  superpoteri: string;
+  puntiCritici: string;
+}
+
+export interface GruppoStato {
+  id: string;
+  teamNum: number;
+  stato: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -141,5 +159,13 @@ export class GameService {
 
   avanzaFase(partitaId: string): Observable<PannelloControllo> {
     return this.http.post<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/avanza-fase`, {});
+  }
+
+  getRuoli(): Observable<Ruolo[]> {
+    return this.http.get<Ruolo[]>(`${this.apiUrl}/ruoli`);
+  }
+
+  segnalaPronto(partitaId: string, giocatoreId: string, sessionToken: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/pronto`, { giocatoreId, sessionToken });
   }
 }
