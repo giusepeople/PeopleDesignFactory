@@ -3,10 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { GameService, PannelloControllo, FaseCorrenteResponse } from '../../core/game.service';
 import { formatSecondi, CountdownSync } from '../../core/countdown.util';
 import { InfoPanel } from '../../core/components/info-panel/info-panel';
+import { Gauge } from '../../core/components/gauge/gauge';
 
 @Component({
   selector: 'app-admin-partita',
-  imports: [InfoPanel],
+  imports: [InfoPanel, Gauge],
   templateUrl: './admin-partita.html',
   styleUrl: './admin-partita.css',
 })
@@ -21,8 +22,6 @@ export class AdminPartita implements OnInit, OnDestroy {
   avviando = signal(false);
   avanzando = signal(false);
   secondiVisualizzati = signal<number | null>(null);
-
-  // conferma avanzamento con gruppi non pronti
   showConfermaAvanza = signal(false);
 
   private countdown = new CountdownSync();
@@ -65,6 +64,15 @@ export class AdminPartita implements OnInit, OnDestroy {
 
   get tempoFormattato(): string {
     return formatSecondi(this.secondiVisualizzati());
+  }
+
+  get percentTrascorso(): number {
+    const rimanenti = this.secondiVisualizzati();
+    const durata = this.faseCorrente()?.fase?.durataMinuti;
+    if (rimanenti === null || rimanenti === undefined || !durata) return 0;
+    const totale = durata * 60;
+    if (totale <= 0) return 0;
+    return Math.min(100, Math.max(0, ((totale - rimanenti) / totale) * 100));
   }
 
   get gruppiPronti(): number {

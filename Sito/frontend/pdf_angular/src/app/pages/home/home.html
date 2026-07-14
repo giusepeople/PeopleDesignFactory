@@ -1,95 +1,110 @@
 <div class="page">
-  <div class="bg-shape bg-shape--a" aria-hidden="true"></div>
-  <div class="bg-shape bg-shape--b" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
 
-  <button type="button" class="admin-trigger" (click)="openAdminModal()">
-    Admin
-  </button>
+  <header class="topbar">
+    <div class="wordmark-stamp">
+      <span class="stamp-eyebrow">People Design Factory</span>
+      <span class="stamp-title">RED LINE</span>
+    </div>
+    <button type="button" class="btn-ghost" (click)="openAdminModal()">Area Game Master</button>
+  </header>
 
   <main class="stage">
-    <div class="wordmark">Workshop</div>
+    <section class="access-card corner-frame">
+      <app-mascot [size]="104" />
 
-    <div class="pin-card">
-      <input
-        class="pin-input"
-        [class.pin-input--error]="pinError()"
-        type="text"
-        inputmode="text"
-        autocomplete="off"
-        spellcheck="false"
-        maxlength="6"
-        placeholder="PIN di gioco"
-        [value]="pin()"
-        (input)="onPinInput($event)"
-        (keydown.enter)="joinGame()"
-        aria-label="Codice partita"
-      />
-      <input
-        class="pin-input"
-        type="text"
-        maxlength="30"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder="Il tuo nome"
-        [value]="nickname()"
-        (input)="onNicknameInput($event)"
-        (keydown.enter)="joinGame()"
-        aria-label="Il tuo nome"
-      />
-      <button type="button" class="join-btn" (click)="joinGame()" [disabled]="joining()">
-        @if (joining()) { Entrata in corso... } @else { Conferma }
+      <p class="eyebrow">Accesso partecipanti</p>
+      <h1 class="stage-title">Entra nel tuo turno in officina</h1>
+      <p class="stage-subtitle">Inserisci il codice mostrato dal Game Master e il tuo nome per unirti al team.</p>
+
+      <div class="field-group">
+        <label class="field-label" for="pin">Codice partita</label>
+        <input
+          id="pin"
+          class="field field--pin"
+          [class.field--error]="pinError()"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="6"
+          placeholder="ES. AB12CD"
+          [value]="pin()"
+          (input)="onPinInput($event)"
+          (keydown.enter)="joinGame()"
+          aria-label="Codice partita"
+        />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="nickname">Il tuo nome</label>
+        <input
+          id="nickname"
+          class="field"
+          type="text"
+          maxlength="30"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Come vuoi farti chiamare"
+          [value]="nickname()"
+          (input)="onNicknameInput($event)"
+          (keydown.enter)="joinGame()"
+          aria-label="Il tuo nome"
+        />
+      </div>
+
+      <button type="button" class="btn-primary btn-block" (click)="joinGame()" [disabled]="joining()">
+        @if (joining()) { Accesso in corso... } @else { Entra in officina → }
       </button>
-    </div>
 
-    @if (pinError()) {
-      <p class="field-error">Inserisci un codice di almeno 4 caratteri e il tuo nome.</p>
-    }
-    @if (joinErrorMsg()) {
-      <p class="field-error">{{ joinErrorMsg() }}</p>
-    }
+      @if (pinError()) {
+        <p class="field-error">Inserisci un codice di almeno 4 caratteri e il tuo nome.</p>
+      }
+      @if (joinErrorMsg()) {
+        <p class="field-error">{{ joinErrorMsg() }}</p>
+      }
+    </section>
   </main>
 
   @if (showAdminModal()) {
     <div class="modal-backdrop" (click)="closeAdminModal()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <button
-          type="button"
-          class="modal-close"
-          (click)="closeAdminModal()"
-          aria-label="Chiudi"
-        >
-          ✕
-        </button>
+      <div class="modal-card corner-frame" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" (click)="closeAdminModal()" aria-label="Chiudi">✕</button>
 
-        <h2 class="modal-title">Accedi come Game Master</h2>
+        <p class="eyebrow">Accesso riservato</p>
+        <h2 class="modal-title">Game Master</h2>
 
-        <label class="field-label" for="admin-username">Username</label>
-        <input
-          id="admin-username"
-          class="modal-input"
-          type="text"
-          autocomplete="username"
-          [value]="adminUsername()"
-          (input)="onAdminUsernameInput($event)"
-        />
+        <div class="field-group">
+          <label class="field-label" for="admin-username">Username</label>
+          <input
+            id="admin-username"
+            class="field"
+            type="text"
+            autocomplete="username"
+            [value]="adminUsername()"
+            (input)="onAdminUsernameInput($event)"
+          />
+        </div>
 
-        <label class="field-label" for="admin-password">Password</label>
-        <input
-          id="admin-password"
-          class="modal-input"
-          type="password"
-          autocomplete="current-password"
-          [value]="adminPassword()"
-          (input)="onAdminPasswordInput($event)"
-          (keydown.enter)="adminLogin()"
-        />
+        <div class="field-group">
+          <label class="field-label" for="admin-password">Password</label>
+          <input
+            id="admin-password"
+            class="field"
+            type="password"
+            autocomplete="current-password"
+            [value]="adminPassword()"
+            (input)="onAdminPasswordInput($event)"
+            (keydown.enter)="adminLogin()"
+          />
+        </div>
 
         @if (adminError()) {
           <p class="field-error">Inserisci username e password.</p>
         }
 
-        <button type="button" class="modal-submit" (click)="adminLogin()">
-          Accedi
+        <button type="button" class="btn-primary btn-block" (click)="adminLogin()" [disabled]="adminLoading()">
+          @if (adminLoading()) { Verifica... } @else { Accedi al pannello }
         </button>
       </div>
     </div>

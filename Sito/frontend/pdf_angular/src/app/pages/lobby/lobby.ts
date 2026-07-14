@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { GameService, LobbyState, FaseCorrenteResponse, Ruolo } from '../../core/game.service';
 import { formatSecondi, CountdownSync } from '../../core/countdown.util';
 import { InfoPanel } from '../../core/components/info-panel/info-panel';
+import { Mascot } from '../../core/components/mascot/mascot';
+import { Gauge } from '../../core/components/gauge/gauge';
 
 interface PlayerSession {
   giocatoreId: string;
@@ -15,7 +17,7 @@ const ORDINE_RUOLI = ['PM', 'SENIOR', 'JUNIOR', 'QA', 'MANUFACTURING'];
 
 @Component({
   selector: 'app-lobby',
-  imports: [InfoPanel],
+  imports: [InfoPanel, Mascot, Gauge],
   templateUrl: './lobby.html',
   styleUrl: './lobby.css',
 })
@@ -90,6 +92,15 @@ export class Lobby implements OnInit, OnDestroy {
 
   get tempoFormattato(): string {
     return formatSecondi(this.secondiVisualizzati());
+  }
+
+  get percentTrascorso(): number {
+    const rimanenti = this.secondiVisualizzati();
+    const durata = this.faseCorrente()?.fase?.durataMinuti;
+    if (rimanenti === null || rimanenti === undefined || !durata) return 0;
+    const totale = durata * 60;
+    if (totale <= 0) return 0;
+    return Math.min(100, Math.max(0, ((totale - rimanenti) / totale) * 100));
   }
 
   get me() {

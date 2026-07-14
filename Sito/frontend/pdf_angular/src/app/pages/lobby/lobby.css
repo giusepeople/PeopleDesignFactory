@@ -1,339 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
+.page { position: relative; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
 
-:host {
-  --teal-a: #0b4f45;
-  --teal-b: #17876b;
-  --card-text: #202325;
-  --text-muted: #6c7378;
-  --border: #dde1e2;
-  --error: #d64545;
-
-  display: block;
-  min-height: 100vh;
+.info-trigger {
+  position: fixed;
+  top: 16px; right: 16px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-900);
+  background: var(--paper-0);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
 }
-
-* {
-  box-sizing: border-box;
-}
-
-.page {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: linear-gradient(160deg, var(--teal-a) 0%, var(--teal-b) 100%);
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.bg-shape {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(2px);
-  pointer-events: none;
-}
-
-.bg-shape--a {
-  width: 60vmax;
-  height: 60vmax;
-  right: -20vmax;
-  top: -25vmax;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.1), transparent 70%);
-}
-
-.bg-shape--b {
-  width: 45vmax;
-  height: 45vmax;
-  left: -18vmax;
-  bottom: -20vmax;
-  background: radial-gradient(circle at 60% 60%, rgba(0, 0, 0, 0.16), transparent 70%);
-}
+.info-trigger:hover { background: var(--paper-100); }
 
 .stage {
   position: relative;
   z-index: 1;
-  flex: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 70px 20px 40px;
 }
 
-.lobby-card {
+.waiting-card {
   width: min(420px, 100%);
-  background: #fff;
-  color: var(--card-text);
-  border-radius: 14px;
-  padding: 28px;
+  background: var(--paper-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px 28px 26px;
   text-align: center;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
-}
-
-.codice-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin: 0 0 4px;
-}
-
-.codice {
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  margin: 0 0 16px;
-}
-
-.status-text {
-  font-weight: 600;
-  margin: 0 0 8px;
-}
-
-.count {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0 0 12px;
-}
-
-.player-list {
-  list-style: none;
-  margin: 0 0 8px;
-  padding: 0;
-  text-align: left;
-}
-
-.player-list li {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-
-.player-list li:last-child {
-  border-bottom: none;
-}
-
-.my-role-card {
-  background: #f5f6f6;
-  border-radius: 10px;
-  padding: 16px;
-  margin: 12px 0;
-}
-
-.label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin: 8px 0 2px;
-}
-
-.gruppo-num,
-.ruolo-nome {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.field-error {
-  font-weight: 600;
-  font-size: 13px;
-  color: #ffd9d9;
-  text-align: center;
-}
-
-.compact {
-  margin-top: 12px;
-  padding: 16px;
-}
-
-.briefing-card {
-  width: min(560px, 100%);
-  background: #fff;
-  color: var(--card-text);
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
-}
-
-.briefing-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.fase-label {
-  font-weight: 700;
-  font-size: 14px;
-  margin: 0;
-}
-
-.timer {
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--teal-b);
-  margin: 0;
-}
-
-.briefing-text {
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0 0 18px;
-}
-
-.dati-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.dato-item {
-  background: #f5f6f6;
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.dato-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin: 0 0 2px;
-  text-transform: uppercase;
-}
-
-.dato-valore {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.my-role-inline {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-}
-
-.my-role-inline .sep {
-  margin: 0 6px;
-}
-
-.briefing-page {
-  width: min(880px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 8px 0 40px;
+  align-items: center;
+  gap: 6px;
 }
+
+.codice { font-family: var(--font-mono); font-size: 36px; font-weight: 700; letter-spacing: 0.12em; margin: 0 0 10px; }
+.status-text { font-weight: 600; margin: 6px 0; }
+
+.player-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+.player-tag { font-size: 13px; font-weight: 600; background: var(--blueprint-50); color: var(--blueprint-600); padding: 7px 13px; border-radius: 999px; }
+
+.briefing-page, .fase-card { width: min(880px, 100%); display: flex; flex-direction: column; gap: 16px; }
 
 .briefing-topbar {
   position: sticky;
-  top: 0;
+  top: 8px;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  color: var(--card-text);
-  border-radius: 12px;
-  padding: 12px 20px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  padding: 16px 22px;
 }
 
+.fase-nome-top { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-top: 3px; }
+
 .briefing-card {
-  background: #fff;
-  color: var(--card-text);
-  border-radius: 14px;
-  padding: 22px 24px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  background: var(--paper-0);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px;
+  box-shadow: var(--shadow-card);
   text-align: left;
 }
 
-.section-title {
-  font-size: 17px;
-  font-weight: 700;
-  margin: 0 0 12px;
-}
-
-.subsection-title {
-  font-size: 14px;
-  font-weight: 700;
-  margin: 16px 0 8px;
-}
-
-.section-text {
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0 0 10px;
-}
-
-.section-text.highlight {
-  font-weight: 600;
-  color: var(--teal-b);
-}
-
-.info-trigger {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 5;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.18);
-  border: none;
-  border-radius: 999px;
-  padding: 9px 16px;
-  cursor: pointer;
-}
-
-.info-trigger:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
+.section-title { font-size: 19px; font-weight: 700; margin: 0 0 12px; }
+.subsection-title { font-size: 13px; font-weight: 700; margin: 18px 0 10px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-500); }
+.section-text { font-size: 14.5px; line-height: 1.65; margin: 0 0 10px; color: var(--ink-700); }
 
 .mio-ruolo-banner {
-  background: #f5f6f6;
-  border-radius: 8px;
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--blueprint-50);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin: 0 0 18px;
   font-size: 14px;
-  margin: 0 0 16px;
 }
+.mio-ruolo-banner p { margin: 0; }
 
-.ruoli-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.ruolo-card {
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-}
-
-.ruolo-mio {
-  border-color: var(--teal-b);
-  box-shadow: 0 0 0 3px rgba(23, 135, 107, 0.15);
-}
+.ruoli-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.ruolo-card { border: 1.5px solid var(--line); border-radius: var(--radius-md); padding: 18px; }
+.ruolo-mio { border-color: var(--blueprint-600); box-shadow: 0 0 0 3px var(--blueprint-50); }
 
 .ruolo-header {
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 15.5px;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--card-text);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink-900);
 }
 
 .tag-tu {
-  background: var(--teal-b);
+  background: var(--redline-600);
   color: #fff;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 8px;
@@ -341,63 +114,44 @@
 }
 
 .ruolo-sezione-title {
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 12px 0 4px;
+  letter-spacing: 0.05em;
+  color: var(--ink-500);
+  margin: 13px 0 5px;
 }
 
-.ruolo-list {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 13px;
-  line-height: 1.5;
-}
+.ruolo-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.55; color: var(--ink-700); }
+.ruolo-list--superpoteri li { color: var(--blueprint-700); }
+.ruolo-list--critici li { color: var(--redline-600); }
 
-.ruolo-list.superpoteri li {
-  color: var(--teal-a);
-}
+.pronto-card { text-align: center; }
+.pronto-ok { font-weight: 600; color: var(--green-600); margin: 0 0 8px; }
+.pronto-wait { font-size: 13px; color: var(--ink-500); margin: 0 0 8px; }
+.pronto-count { font-family: var(--font-mono); font-size: 12px; color: var(--ink-500); margin: 10px 0 0; }
 
-.ruolo-list.punti-critici li {
-  color: var(--error);
-}
-
-.pronto-card {
+.fase-card {
+  background: var(--paper-0);
+  border-radius: var(--radius-lg);
+  padding: 30px 26px;
+  box-shadow: var(--shadow-card);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.pronto-btn {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  color: #fff;
-  background: var(--teal-b);
-  border: none;
-  border-radius: 10px;
-  padding: 14px 32px;
-  cursor: pointer;
-}
+.my-role-card { background: var(--paper-100); border-radius: var(--radius-md); padding: 18px; margin-top: 14px; width: 100%; max-width: 320px; }
+.label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-500); margin: 10px 0 2px; }
+.gruppo-num, .ruolo-nome { font-family: var(--font-display); font-size: 21px; font-weight: 700; margin: 0; }
 
-.pronto-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
+.compact { width: min(880px, 100%); margin: 0 auto; text-align: left; }
 
-.pronto-ok {
-  font-weight: 600;
-  color: var(--teal-b);
-  margin: 0 0 8px;
-}
-
-.pronto-wait {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0 0 8px;
-}
-
-.pronto-count {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 8px 0 0;
+@media (max-width: 640px) {
+  .briefing-topbar { flex-direction: column; align-items: flex-start; gap: 10px; position: static; }
+  .briefing-card { padding: 20px; }
+  .stage { padding: 66px 14px 30px; }
 }

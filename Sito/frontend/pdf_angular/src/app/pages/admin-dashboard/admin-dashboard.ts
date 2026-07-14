@@ -1,16 +1,20 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameService, GameSummary, FaseSummary } from '../../core/game.service';
+import { AuthService } from '../../core/auth.service';
+import { Mascot } from '../../core/components/mascot/mascot';
+import { InfoPanel } from '../../core/components/info-panel/info-panel';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [],
+  imports: [Mascot, InfoPanel],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
 export class AdminDashboard implements OnInit {
   private gameService = inject(GameService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   step = signal<'loading' | 'lista' | 'anteprima'>('loading');
   games = signal<GameSummary[]>([]);
@@ -75,5 +79,10 @@ export class AdminDashboard implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/']);
   }
 }

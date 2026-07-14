@@ -1,0 +1,6 @@
+<div class="gauge" [class.gauge--lg]="size === 'lg'" [class.gauge--zone-amber]="zone === 'amber'" [class.gauge--zone-red]="zone === 'red'">
+  <div class="gauge-arc"></div>
+  <div class="gauge-needle" [style.transform]="'translateX(-50%) rotate(' + needleAngle + 'deg)'"></div>
+  <div class="gauge-hub"></div>
+  <p class="gauge-label">{{ label }}</p>
+</div>

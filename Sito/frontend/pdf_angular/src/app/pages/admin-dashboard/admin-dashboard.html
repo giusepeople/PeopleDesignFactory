@@ -1,15 +1,26 @@
 <div class="dashboard">
+  <div class="grid-overlay grid-overlay--dark" aria-hidden="true"></div>
+
   <header class="dashboard-header">
-    <h1>Dashboard Game Master</h1>
+    <div>
+      <p class="eyebrow eyebrow--on-dark">Pannello di controllo</p>
+      <h1 class="dashboard-title">Game Master</h1>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-ghost btn-ghost--on-dark" (click)="infoPanel.apri()">Guida</button>
+      <button type="button" class="btn-ghost btn-ghost--on-dark" (click)="logout()">Esci</button>
+    </div>
   </header>
+
+  <app-info-panel #infoPanel />
 
   <main class="dashboard-content">
     @if (step() === 'loading') {
-      <p class="loading-text">Caricamento...</p>
+      <p class="loading-text">Caricamento partite...</p>
     }
 
     @if (step() === 'lista') {
-      <button type="button" class="create-btn" (click)="apriAnteprima()" [disabled]="loading()">
+      <button type="button" class="btn-primary create-btn" (click)="apriAnteprima()" [disabled]="loading()">
         @if (loading()) { Caricamento... } @else { + Nuova partita }
       </button>
 
@@ -19,35 +30,48 @@
             <div class="game-card">
               <div class="game-card-info">
                 <p class="game-code">{{ game.codice }}</p>
-                <p class="game-status">Stato: {{ game.status }}</p>
+                <span
+                  class="chip"
+                  [class.chip--blue]="game.status === 'IN_ATTESA'"
+                  [class.chip--green]="game.status === 'IN_CORSO'"
+                  [class.chip--amber]="game.status === 'TERMINATA'"
+                >{{ game.status }}</span>
               </div>
-              <button type="button" class="secondary-btn" (click)="apriPannello(game.id)">
-                Apri pannello di controllo
-              </button>
+              <button type="button" class="btn-secondary" (click)="apriPannello(game.id)">Apri pannello →</button>
             </div>
           }
         </div>
       } @else {
-        <p class="empty-text">Non hai ancora creato nessuna partita.</p>
+        <div class="empty-state">
+          <app-mascot [size]="100" />
+          <p class="empty-text">Non hai ancora creato nessuna partita.<br>Crea la prima sessione per iniziare.</p>
+        </div>
       }
     }
 
     @if (step() === 'anteprima') {
-      <div class="struttura-preview">
-        <h2 class="preview-title">Struttura della partita</h2>
+      <div class="struttura-preview surface-card">
+        <p class="eyebrow">Verifica struttura</p>
+        <h2 class="preview-title">7 fasi, 4 livelli</h2>
 
-        @for (fase of struttura(); track fase.id) {
-          <div class="fase-card">
-            <p class="fase-title">{{ fase.ordinal }}. {{ fase.nome }} <span class="fase-durata">({{ fase.durataMinuti }} min)</span></p>
-            @if (fase.modulo) {
-              <p class="modulo-title">{{ fase.modulo.titolo }} — {{ fase.modulo.domande.length }} domande</p>
-            }
-          </div>
-        }
+        <div class="fase-list">
+          @for (fase of struttura(); track fase.id) {
+            <div class="fase-row">
+              <span class="fase-index">{{ fase.ordinal }}</span>
+              <div class="fase-row-content">
+                <p class="fase-nome">{{ fase.nome }}</p>
+                @if (fase.modulo) {
+                  <p class="fase-modulo">{{ fase.modulo.titolo }} — {{ fase.modulo.domande.length }} domande</p>
+                }
+              </div>
+              <span class="fase-durata">{{ fase.durataMinuti }} min</span>
+            </div>
+          }
+        </div>
 
         <div class="preview-actions">
-          <button type="button" class="secondary-btn" (click)="annullaAnteprima()">Annulla</button>
-          <button type="button" class="create-btn" (click)="confermaCreazione()" [disabled]="loading()">
+          <button type="button" class="btn-secondary" (click)="annullaAnteprima()">Annulla</button>
+          <button type="button" class="btn-primary" (click)="confermaCreazione()" [disabled]="loading()">
             @if (loading()) { Creazione in corso... } @else { Conferma e crea partita }
           </button>
         </div>
@@ -55,7 +79,7 @@
     }
 
     @if (error()) {
-      <p class="error">Si è verificato un errore. Riprova.</p>
+      <p class="field-error field-error--on-dark">Si è verificato un errore. Riprova.</p>
     }
   </main>
 </div>

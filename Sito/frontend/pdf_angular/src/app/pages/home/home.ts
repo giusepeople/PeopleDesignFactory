@@ -2,10 +2,11 @@ import { Component, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { GameService } from '../../core/game.service';
+import { Mascot } from '../../core/components/mascot/mascot';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [Mascot],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -14,7 +15,6 @@ export class Home {
   private gameService = inject(GameService);
   private router = inject(Router);
 
-  // --- accesso giocatore ---
   pin = signal('');
   nickname = signal('');
   pinError = signal(false);
@@ -22,10 +22,7 @@ export class Home {
   joining = signal(false);
 
   onPinInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '')
-      .slice(0, 6);
+    const value = (event.target as HTMLInputElement).value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     this.pin.set(value);
     this.pinError.set(false);
     this.joinErrorMsg.set('');
@@ -64,16 +61,13 @@ export class Home {
     });
   }
 
-  // --- accesso game master ---
   showAdminModal = signal(false);
   adminUsername = signal('');
   adminPassword = signal('');
   adminError = signal(false);
   adminLoading = signal(false);
 
-  openAdminModal() {
-    this.showAdminModal.set(true);
-  }
+  openAdminModal() { this.showAdminModal.set(true); }
 
   closeAdminModal() {
     this.showAdminModal.set(false);
@@ -82,13 +76,8 @@ export class Home {
     this.adminPassword.set('');
   }
 
-  onAdminUsernameInput(event: Event) {
-    this.adminUsername.set((event.target as HTMLInputElement).value);
-  }
-
-  onAdminPasswordInput(event: Event) {
-    this.adminPassword.set((event.target as HTMLInputElement).value);
-  }
+  onAdminUsernameInput(event: Event) { this.adminUsername.set((event.target as HTMLInputElement).value); }
+  onAdminPasswordInput(event: Event) { this.adminPassword.set((event.target as HTMLInputElement).value); }
 
   adminLogin() {
     if (!this.adminUsername() || !this.adminPassword()) {

@@ -1,0 +1,9 @@
+:host { display: inline-flex; }
+.mascot-line { stroke: var(--ink-900); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.mascot-line--thin { stroke-width: 3.5; }
+.mascot-fill { fill: var(--ink-900); stroke: none; }
+.mascot-hat { fill: var(--redline-600); stroke: var(--ink-900); stroke-width: 3; }
+.mascot-shadow { fill: rgba(18, 24, 31, 0.12); }
+.mascot-shadow-cut { fill: var(--paper-0); }
+.mascot-badge { fill: var(--green-600); }
+.mascot-badge-check { stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
