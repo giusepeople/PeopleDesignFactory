@@ -37,8 +37,18 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        // rotte pubbliche dei giocatori, le apriremo negli step successivi
-                        .requestMatchers("/games/join", "/games/*/state", "/games/*/fase-corrente", "/games/*/pronto", "/ruoli").permitAll()
+                        // rotte pubbliche dei giocatori: lobby, fase corrente, ready check, ruoli,
+                        // e compilazione/invio del foglio risposta di ogni Livello (autenticate via sessionToken)
+                        .requestMatchers(
+                                "/games/join",
+                                "/games/*/state",
+                                "/games/*/fase-corrente",
+                                "/games/*/pronto",
+                                "/games/*/modulo-corrente",
+                                "/games/*/modulo-corrente/salva",
+                                "/games/*/modulo-corrente/invia",
+                                "/ruoli"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

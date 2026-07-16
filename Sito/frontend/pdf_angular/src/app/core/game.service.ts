@@ -119,6 +119,71 @@ export interface GruppoStato {
   stato: string;
 }
 
+// ---------- Foglio Risposta di ogni Livello ----------
+
+export interface Opzione {
+  valore: string;
+  etichetta: string;
+}
+
+export interface DomandaModulo {
+  id: string;
+  orderIndex: number;
+  type: string; // SCELTA_MULTIPLA | APERTA
+  text: string;
+  opzioni: Opzione[] | null;
+  restrictedRoleCodice: string | null;
+  restrictedRoleNome: string | null;
+}
+
+export interface RispostaEsistente {
+  domandaId: string;
+  testoRisposta: string | null;
+}
+
+export interface ModuloCorrenteResponse {
+  moduloId: string;
+  titolo: string;
+  domande: DomandaModulo[];
+  risposteAttuali: RispostaEsistente[];
+  invioStato: string; // BOZZA | INVIATO | APPROVATO | RIFIUTATO
+  motivoRifiuto: string | null;
+  minutiExtra: number;
+  sonoIoPM: boolean;
+  mioRuoloCodice: string | null;
+  secondiRimanenti: number | null;
+  serverTimestamp: string | null;
+}
+
+export interface RispostaInput {
+  domandaId: string;
+  testoRisposta: string;
+}
+
+export interface RispostaGm {
+  domandaId: string;
+  orderIndex: number;
+  domandaTesto: string;
+  tipo: string;
+  testoRisposta: string | null;
+  corretta: boolean | null;
+  opzioneCorretta: string | null;
+  hintText: string | null;
+  rispostoDaNickname: string | null;
+}
+
+export interface InvioModuloGm {
+  invioId: string | null;
+  gruppoId: string;
+  teamNum: number;
+  statoGruppo: string;
+  statoInvio: string;
+  inviatoIl: string | null;
+  motivoRifiuto: string | null;
+  minutiExtra: number;
+  risposte: RispostaGm[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GameService {
   private readonly apiUrl = 'http://localhost:8080';
@@ -167,5 +232,56 @@ export class GameService {
 
   segnalaPronto(partitaId: string, giocatoreId: string, sessionToken: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/pronto`, { giocatoreId, sessionToken });
+  }
+
+  // ---------- Foglio Risposta (giocatore) ----------
+
+  getModuloCorrente(partitaId: string, giocatoreId: string, sessionToken: string): Observable<ModuloCorrenteResponse> {
+    return this.http.get<ModuloCorrenteResponse>(`${this.apiUrl}/games/${partitaId}/modulo-corrente`, {
+      params: { giocatoreId, sessionToken },
+    });
+  }
+
+  salvaRisposteModulo(
+    partitaId: string,
+    giocatoreId: string,
+    sessionToken: string,
+    risposte: RispostaInput[]
+  ): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/modulo-corrente/salva`, {
+      giocatoreId,
+      sessionToken,
+      risposte,
+    });
+  }
+
+  inviaModulo(
+    partitaId: string,
+    giocatoreId: string,
+    sessionToken: string,
+    risposte: RispostaInput[]
+  ): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/modulo-corrente/invia`, {
+      giocatoreId,
+      sessionToken,
+      risposte,
+    });
+  }
+
+  // ---------- Foglio Risposta (Game Master) ----------
+
+  getRevisioneModuli(partitaId: string): Observable<InvioModuloGm[]> {
+    return this.http.get<InvioModuloGm[]>(`${this.apiUrl}/games/${partitaId}/moduli/revisione`);
+  }
+
+  approvaModulo(partitaId: string, invioId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/moduli/${invioId}/approva`, {});
+  }
+
+  rifiutaModulo(partitaId: string, invioId: string, motivoRifiuto: string, minutiExtra: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/games/${partitaId}/moduli/${invioId}/rifiuta`, {
+      motivoRifiuto,
+      minutiExtra,
+    });
   }
 }

@@ -329,7 +329,10 @@ public class GameController {
             faseDto = new FaseCorrenteDTO(f.getId(), f.getOrdinal(), f.getNome(), f.getTipo().name(), f.getDefaultDurataMinuti());
         }
 
-        boolean tuttiPronti = !gruppi.isEmpty() && gruppi.stream().allMatch(g -> g.getStato() == StatoTeam.PRONTO);
+        // un gruppo e' "pronto" per avanzare sia quando ha semplicemente segnalato PRONTO (es. Briefing)
+        // sia quando il Game Master ha approvato il suo Foglio Risposta del Livello corrente
+        boolean tuttiPronti = !gruppi.isEmpty() && gruppi.stream()
+                .allMatch(g -> g.getStato() == StatoTeam.PRONTO || g.getStato() == StatoTeam.APPROVATO);
 
         return new PannelloControlloResponse(
                 partita.getId(), partita.getCodPartita(), partita.getStatus().name(),

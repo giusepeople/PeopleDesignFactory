@@ -1,0 +1,69 @@
+<section class="modulo-revisione panel-section">
+  <p class="eyebrow">Revisione consegne</p>
+  <h2 class="section-title">Foglio Risposta — gruppi</h2>
+
+  @if (loading()) {
+    <p class="loading-text">Caricamento consegne...</p>
+  }
+
+  @if (errorMsg()) { <p class="field-error">{{ errorMsg() }}</p> }
+
+  <div class="revisione-grid">
+    @for (invio of gruppi(); track invio.gruppoId) {
+      <div class="revisione-card corner-frame">
+        <div class="revisione-header">
+          <p class="revisione-title">Gruppo {{ invio.teamNum }}</p>
+          <span
+            class="chip"
+            [class.chip--amber]="invio.statoInvio === 'INVIATO'"
+            [class.chip--green]="invio.statoInvio === 'APPROVATO'"
+            [class.chip--red]="invio.statoInvio === 'RIFIUTATO'"
+          >{{ etichettaStato(invio.statoInvio) }}</span>
+        </div>
+
+        <div class="risposte-list">
+          @for (r of invio.risposte; track r.domandaId) {
+            <div class="risposta-item">
+              <p class="risposta-domanda">
+                Q{{ r.orderIndex }}. {{ r.domandaTesto }}
+                @if (r.corretta === true) { <span class="chip chip--green">corretta</span> }
+                @if (r.corretta === false) { <span class="chip chip--red">errata</span> }
+              </p>
+              <p class="risposta-testo">{{ r.testoRisposta || '—' }}</p>
+              @if (r.rispostoDaNickname) {
+                <p class="risposta-autore">{{ r.rispostoDaNickname }}</p>
+              }
+            </div>
+          }
+        </div>
+
+        @if (invio.statoInvio === 'INVIATO') {
+          @if (gruppoInRifiuto() === invio.gruppoId) {
+            <div class="rifiuto-form">
+              <label class="field-label">Motivo del rifiuto / hint per il gruppo</label>
+              <textarea class="field" rows="2" [value]="motivoRifiuto()" (input)="onMotivoInput($event)"></textarea>
+              <label class="field-label">Minuti extra concessi</label>
+              <input class="field" type="number" min="0" [value]="minutiExtra()" (input)="onMinutiInput($event)" />
+              <div class="rifiuto-actions">
+                <button type="button" class="btn-secondary" (click)="annullaRifiuta()">Annulla</button>
+                <button
+                  type="button"
+                  class="btn-danger"
+                  (click)="confermaRifiuta(invio)"
+                  [disabled]="processando() === invio.invioId || !motivoRifiuto().trim()"
+                >Conferma rifiuto</button>
+              </div>
+            </div>
+          } @else {
+            <div class="revisione-actions">
+              <button type="button" class="btn-secondary" (click)="apriRifiuta(invio)" [disabled]="processando() === invio.invioId">Rifiuta</button>
+              <button type="button" class="btn-primary" (click)="approva(invio)" [disabled]="processando() === invio.invioId">
+                @if (processando() === invio.invioId) { Approvazione... } @else { Approva → }
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</section>

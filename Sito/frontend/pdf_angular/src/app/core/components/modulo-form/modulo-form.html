@@ -1,0 +1,93 @@
+<section class="modulo-form surface-card">
+  @if (loading()) {
+    <p class="loading-text">Caricamento del foglio risposta...</p>
+  } @else if (modulo(); as m) {
+    <p class="eyebrow">Foglio risposta</p>
+    <h2 class="section-title">{{ m.titolo }}</h2>
+
+    @if (m.invioStato === 'RIFIUTATO') {
+      <div class="banner banner--rifiutato">
+        <p class="banner-title">Il Game Master ha rimandato indietro il modulo</p>
+        <p class="banner-text">{{ m.motivoRifiuto }}</p>
+        @if (m.minutiExtra > 0) {
+          <p class="banner-extra">+ {{ m.minutiExtra }} minuti extra concessi</p>
+        }
+      </div>
+    }
+
+    @if (m.invioStato === 'INVIATO') {
+      <div class="banner banner--inviato">
+        <p class="banner-title">Modulo inviato, in attesa di revisione del Game Master...</p>
+      </div>
+    }
+
+    @if (m.invioStato === 'APPROVATO') {
+      <div class="banner banner--approvato">
+        <p class="banner-title">✓ Modulo approvato. Attendete che tutti i gruppi abbiano finito.</p>
+      </div>
+    }
+
+    <div class="domande-list">
+      @for (d of m.domande; track d.id) {
+        <div class="domanda-block" [class.domanda-block--restricted]="d.restrictedRoleCodice">
+          <p class="domanda-index">
+            Domanda {{ d.orderIndex }}
+            @if (d.restrictedRoleCodice) {
+              <span class="chip chip--amber">Solo {{ d.restrictedRoleNome }}</span>
+            }
+          </p>
+          <p class="domanda-text">{{ d.text }}</p>
+
+          @if (d.type === 'SCELTA_MULTIPLA') {
+            <div class="opzioni-list">
+              @for (o of d.opzioni; track o.valore) {
+                <label class="opzione-item" [class.opzione-item--disabled]="!isEditable(d)">
+                  <input
+                    type="radio"
+                    [name]="d.id"
+                    [value]="o.valore"
+                    [checked]="formValues()[d.id] === o.valore"
+                    [disabled]="!isEditable(d)"
+                    (change)="onValueChange(d.id, o.valore)"
+                  />
+                  <span><strong>{{ o.valore }}.</strong> {{ o.etichetta }}</span>
+                </label>
+              }
+            </div>
+          } @else {
+            <textarea
+              class="field domanda-textarea"
+              rows="3"
+              [disabled]="!isEditable(d)"
+              [value]="formValues()[d.id] ?? ''"
+              (input)="onValueChange(d.id, $any($event.target).value)"
+            ></textarea>
+          }
+
+          @if (!isEditable(d) && d.restrictedRoleCodice && !bloccato) {
+            <p class="hint-text">Questo campo può essere compilato solo da chi ha il ruolo {{ d.restrictedRoleNome }}.</p>
+          }
+        </div>
+      }
+    </div>
+
+    @if (errorMsg()) { <p class="field-error">{{ errorMsg() }}</p> }
+    @if (okMsg()) { <p class="ok-text">{{ okMsg() }}</p> }
+
+    <div class="modulo-actions">
+      @if (!bloccato) {
+        <button type="button" class="btn-secondary" (click)="salvaBozza()" [disabled]="salvando()">
+          @if (salvando()) { Salvataggio... } @else { Salva bozza }
+        </button>
+      }
+      @if (sonoIoPM && !bloccato) {
+        <button type="button" class="btn-primary" (click)="inviaModulo()" [disabled]="inviando()">
+          @if (inviando()) { Invio... } @else { Invia al Game Master → }
+        </button>
+      }
+      @if (!sonoIoPM && !bloccato) {
+        <p class="pm-hint">Solo il Project Manager può inviare il modulo al Game Master.</p>
+      }
+    </div>
+  }
+</section>

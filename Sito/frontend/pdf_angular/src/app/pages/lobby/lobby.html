@@ -117,6 +117,33 @@
                   <p class="pronto-count">{{ gruppiPronti }} / {{ totaleGruppi }} gruppi pronti</p>
                 </section>
               </div>
+            } @else if (f.fase?.tipo === 'LIVELLO') {
+              <div class="briefing-page">
+                <div class="briefing-topbar surface-card">
+                  <div>
+                    <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+                    <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+                  </div>
+                  <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
+                </div>
+
+                <section class="fase-card corner-frame">
+                  <div class="my-role-card">
+                    <p class="label">Sei nel</p>
+                    <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+                    <p class="label">Il tuo ruolo</p>
+                    <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+                  </div>
+                </section>
+
+                @if (session(); as sess) {
+                  <app-modulo-form
+                    [partitaId]="partitaId"
+                    [giocatoreId]="sess.giocatoreId"
+                    [sessionToken]="sess.sessionToken"
+                  />
+                }
+              </div>
             } @else {
               <section class="fase-card corner-frame">
                 <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>

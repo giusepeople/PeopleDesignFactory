@@ -5,22 +5,27 @@ import com.pdfactory.pdf_spring.enums.TipoFase;
 import com.pdfactory.pdf_spring.model.Domanda;
 import com.pdfactory.pdf_spring.model.Fase;
 import com.pdfactory.pdf_spring.model.Modulo;
+import com.pdfactory.pdf_spring.model.Ruolo;
 import com.pdfactory.pdf_spring.repository.FaseRepository;
 import com.pdfactory.pdf_spring.repository.ModuloRepository;
+import com.pdfactory.pdf_spring.repository.RuoloRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(2) // dopo il DataSeeder del GM
+@Order(2) // dopo il DataSeeder/RuoloSeeder del GM e dei ruoli
 public class GameStructureSeeder implements CommandLineRunner {
 
     private final FaseRepository faseRepository;
     private final ModuloRepository moduloRepository;
+    private final RuoloRepository ruoloRepository;
 
-    public GameStructureSeeder(FaseRepository faseRepository, ModuloRepository moduloRepository) {
+    public GameStructureSeeder(FaseRepository faseRepository, ModuloRepository moduloRepository,
+                               RuoloRepository ruoloRepository) {
         this.faseRepository = faseRepository;
         this.moduloRepository = moduloRepository;
+        this.ruoloRepository = ruoloRepository;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class GameStructureSeeder implements CommandLineRunner {
         }
 
         Fase f1 = creaFase(1, "Briefing", TipoFase.BRIEFING, 10);
-        Fase f2 = creaFase(2, "Livello 1 - Diagnosi tecnica", TipoFase.LIVELLO, 15);
+        Fase f2 = creaFase(2, "Livello 1 - Diagnosi tecnica", TipoFase.LIVELLO, 20);
         creaFase(3, "Turbativa 1 - Scambio PM", TipoFase.TURBATIVA, 4);
         Fase f4 = creaFase(4, "Livello 2 - Decisione gestionale", TipoFase.LIVELLO, 20);
         creaFase(5, "Livello 3 - Presentazione al cliente", TipoFase.PRESENTAZIONE, 8);
@@ -92,18 +97,38 @@ public class GameStructureSeeder implements CommandLineRunner {
     private void creaModuloLivello1(Fase fase) {
         Modulo modulo = new Modulo();
         modulo.setFase(fase);
-        modulo.setTitolo("Diagnosi tecnica - Modulo gruppo");
+        modulo.setTitolo("Diagnosi tecnica - Foglio Risposta L1");
+
+        Ruolo senior = ruoloRepository.findByCodice("SENIOR").orElse(null);
+
+        String opzioniD1 = """
+            [
+              {"valore": "A", "etichetta": "Difetto del materiale (inclusioni o disomogeneità del 42CrMo4)"},
+              {"valore": "B", "etichetta": "Errore di processo nel trattamento termico (tempra non uniforme)"},
+              {"valore": "C", "etichetta": "Errore geometrico nel raccordo (R3 invece di R5) con conseguente sovra-concentrazione delle tensioni a fatica"},
+              {"valore": "D", "etichetta": "Sovraccarico accidentale durante i test (carichi applicati oltre specifica)"}
+            ]
+            """;
 
         aggiungiDomanda(modulo, 1, TipoDomanda.SCELTA_MULTIPLA,
-                "Sulla base delle osservazioni visive, qual è la causa più probabile del difetto?",
-                "Guarda la zona della frattura rispetto alla direzione del carico.");
+                "Qual è la causa principale del cedimento dell'albero AT-7X? Scegli tra le opzioni e giustifica in 3-5 righe.",
+                "Guarda la zona della frattura rispetto alla direzione del carico.",
+                opzioniD1, "C", null);
+
         aggiungiDomanda(modulo, 2, TipoDomanda.APERTA,
-                "Quali ulteriori dati raccogliereste per confermare l'ipotesi? (max 3 righe)", null);
-        aggiungiDomanda(modulo, 3, TipoDomanda.SCELTA_MULTIPLA,
-                "In base ai dati di processo forniti, quale parametro risulta fuori tolleranza?",
-                "Confronta i valori con la scheda tecnica del materiale.");
+                "Quale dato numerico vi ha permesso di escludere le altre opzioni? Citate almeno un valore dal briefing.",
+                null, null, null, null);
+
+        aggiungiDomanda(modulo, 3, TipoDomanda.APERTA,
+                "[CAMPO SENIOR] Il Progettista Senior descrive sinteticamente il meccanismo di cedimento a fatica e " +
+                        "spiega perché la variazione di raggio da R5 a R3 è critica in questo caso specifico " +
+                        "(contesto EV con picchi di coppia elevati).",
+                null, null, null, senior);
+
         aggiungiDomanda(modulo, 4, TipoDomanda.APERTA,
-                "Il componente rispetta il margine di sicurezza richiesto dal calcolo rapido? Motivate.", null);
+                "Se doveste comunicare la causa al cliente NORDAUTO in 2 frasi (stile executive), come lo fareste? " +
+                        "Scrivete le 2 frasi.",
+                null, null, null, null);
 
         moduloRepository.save(modulo);
     }
@@ -143,12 +168,20 @@ public class GameStructureSeeder implements CommandLineRunner {
     }
 
     private void aggiungiDomanda(Modulo modulo, int ordine, TipoDomanda tipo, String testo, String hint) {
+        aggiungiDomanda(modulo, ordine, tipo, testo, hint, null, null, null);
+    }
+
+    private void aggiungiDomanda(Modulo modulo, int ordine, TipoDomanda tipo, String testo, String hint,
+                                 String opzioniJson, String opzioneCorretta, Ruolo restrictedRole) {
         Domanda domanda = new Domanda();
         domanda.setModuloTemplate(modulo);
         domanda.setOrderIndex(ordine);
         domanda.setType(tipo);
         domanda.setText(testo);
         domanda.setHintText(hint);
+        domanda.setOpzioneJson(opzioniJson);
+        domanda.setOpzioneCorretta(opzioneCorretta);
+        domanda.setRestrictedRole(restrictedRole);
         modulo.getDomande().add(domanda);
     }
 }

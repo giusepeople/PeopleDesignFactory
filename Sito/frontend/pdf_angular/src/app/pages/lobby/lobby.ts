@@ -5,6 +5,7 @@ import { formatSecondi, CountdownSync } from '../../core/countdown.util';
 import { InfoPanel } from '../../core/components/info-panel/info-panel';
 import { Mascot } from '../../core/components/mascot/mascot';
 import { Gauge } from '../../core/components/gauge/gauge';
+import { ModuloForm } from '../../core/components/modulo-form/modulo-form';
 
 interface PlayerSession {
   giocatoreId: string;
@@ -17,7 +18,7 @@ const ORDINE_RUOLI = ['PM', 'SENIOR', 'JUNIOR', 'QA', 'MANUFACTURING'];
 
 @Component({
   selector: 'app-lobby',
-  imports: [InfoPanel, Mascot, Gauge],
+  imports: [InfoPanel, Mascot, Gauge, ModuloForm],
   templateUrl: './lobby.html',
   styleUrl: './lobby.css',
 })

@@ -80,6 +80,10 @@
           </div>
         }
       </section>
+
+      @if (f.fase?.tipo === 'LIVELLO') {
+        <app-modulo-revisione [partitaId]="partitaId" />
+      }
     }
 
     @if (p.status === 'TERMINATA') {
@@ -98,7 +102,7 @@
             <div class="group-card corner-frame">
               <p class="group-title">
                 Gruppo {{ gruppo.teamNum }}
-                <span class="chip" [class.chip--green]="gruppo.stato === 'PRONTO'">{{ gruppo.stato }}</span>
+                <span class="chip" [class.chip--green]="gruppo.stato === 'PRONTO' || gruppo.stato === 'APPROVATO'">{{ gruppo.stato }}</span>
               </p>
               <ul class="group-members">
                 @for (membro of gruppo.giocatori; track membro.id) {

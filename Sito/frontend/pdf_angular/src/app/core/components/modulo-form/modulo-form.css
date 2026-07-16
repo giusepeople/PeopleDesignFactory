@@ -1,0 +1,42 @@
+.modulo-form { width: min(880px, 100%); margin: 0 auto; text-align: left; }
+.loading-text { text-align: center; color: var(--ink-500); padding: 20px 0; }
+
+.banner { border-radius: var(--radius-md); padding: 14px 16px; margin: 12px 0 18px; }
+.banner-title { font-weight: 700; margin: 0 0 4px; }
+.banner-text { font-size: 13.5px; margin: 0; }
+.banner-extra { font-family: var(--font-mono); font-size: 12px; margin: 6px 0 0; font-weight: 600; }
+
+.banner--rifiutato { background: var(--redline-50); color: var(--redline-700); }
+.banner--inviato { background: var(--brass-50); color: var(--brass-500); }
+.banner--approvato { background: var(--green-50); color: var(--green-600); }
+
+.domande-list { display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }
+.domanda-block { border: 1.5px solid var(--line); border-radius: var(--radius-md); padding: 16px 18px; }
+.domanda-block--restricted { border-color: var(--brass-500); background: var(--brass-50); }
+
+.domanda-index {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin: 0 0 6px;
+}
+.domanda-text { font-size: 14.5px; font-weight: 600; line-height: 1.5; margin: 6px 0 12px; color: var(--ink-900); }
+
+.opzioni-list { display: flex; flex-direction: column; gap: 8px; }
+.opzione-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--ink-700); cursor: pointer; }
+.opzione-item--disabled { opacity: 0.6; cursor: default; }
+.opzione-item input { margin-top: 3px; }
+
+.domanda-textarea { resize: vertical; font-family: var(--font-body); }
+
+.hint-text { font-size: 12px; color: var(--ink-500); margin: 8px 0 0; }
+.ok-text { color: var(--green-600); font-weight: 600; font-size: 13px; margin: 10px 0 0; }
+
+.modulo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+.pm-hint { font-size: 13px; color: var(--ink-500); margin: 0; }

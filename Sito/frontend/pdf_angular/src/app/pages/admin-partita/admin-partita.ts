@@ -4,10 +4,11 @@ import { GameService, PannelloControllo, FaseCorrenteResponse } from '../../core
 import { formatSecondi, CountdownSync } from '../../core/countdown.util';
 import { InfoPanel } from '../../core/components/info-panel/info-panel';
 import { Gauge } from '../../core/components/gauge/gauge';
+import { ModuloRevisione } from '../../core/components/modulo-revisione/modulo-revisione';
 
 @Component({
   selector: 'app-admin-partita',
-  imports: [InfoPanel, Gauge],
+  imports: [InfoPanel, Gauge, ModuloRevisione],
   templateUrl: './admin-partita.html',
   styleUrl: './admin-partita.css',
 })
@@ -76,7 +77,7 @@ export class AdminPartita implements OnInit, OnDestroy {
   }
 
   get gruppiPronti(): number {
-    return this.pannello()?.gruppi.filter((g) => g.stato === 'PRONTO').length ?? 0;
+    return this.pannello()?.gruppi.filter((g) => g.stato === 'PRONTO' || g.stato === 'APPROVATO').length ?? 0;
   }
 
   get totaleGruppi(): number {
@@ -85,7 +86,7 @@ export class AdminPartita implements OnInit, OnDestroy {
 
   get gruppiNonPronti(): string[] {
     return (this.pannello()?.gruppi ?? [])
-      .filter((g) => g.stato !== 'PRONTO')
+      .filter((g) => g.stato !== 'PRONTO' && g.stato !== 'APPROVATO')
       .map((g) => `Gruppo ${g.teamNum} (${this.etichettaStato(g.stato)})`);
   }
 
@@ -94,6 +95,7 @@ export class AdminPartita implements OnInit, OnDestroy {
       case 'LAVORANDO': return 'sta lavorando';
       case 'INVIATO': return 'in attesa di revisione';
       case 'RIFIUTATO': return 'modulo rifiutato';
+      case 'APPROVATO': return 'modulo approvato';
       default: return stato;
     }
   }
