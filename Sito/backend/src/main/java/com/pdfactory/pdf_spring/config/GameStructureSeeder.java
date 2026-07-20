@@ -36,7 +36,7 @@ public class GameStructureSeeder implements CommandLineRunner {
 
         Fase f1 = creaFase(1, "Briefing", TipoFase.BRIEFING, 10);
         Fase f2 = creaFase(2, "Livello 1 - Diagnosi tecnica", TipoFase.LIVELLO, 20);
-        creaFase(3, "Turbativa 1 - Scambio PM", TipoFase.TURBATIVA, 4);
+        Fase f3 = creaFase(3, "Turbativa 1 - Scambio PM", TipoFase.TURBATIVA, 5);
         Fase f4 = creaFase(4, "Livello 2 - Decisione gestionale", TipoFase.LIVELLO, 20);
         creaFase(5, "Livello 3 - Presentazione al cliente", TipoFase.PRESENTAZIONE, 8);
         Fase f6 = creaFase(6, "Livello 4 - Ottimizzazione finale", TipoFase.LIVELLO, 20);
@@ -44,6 +44,7 @@ public class GameStructureSeeder implements CommandLineRunner {
 
         popolaBriefing(f1);
         popolaDatiLivello1(f2);
+        popolaTurbativa1(f3);
 
         creaModuloLivello1(f2);
         creaModuloLivello2(f4);
@@ -111,6 +112,21 @@ public class GameStructureSeeder implements CommandLineRunner {
         ]
         """);
 
+        faseRepository.save(fase);
+    }
+
+    private void popolaTurbativa1(Fase fase) {
+        fase.setContenutoTesto(
+                "\"ATTENZIONE PEOPLE DESIGN FACTORY. Il Direttore Moretti ha appena chiamato dall'aeroporto. " +
+                        "Per esigenze aziendali urgenti, tutti i Project Manager devono spostarsi immediatamente " +
+                        "al tavolo successivo (senso orario). Avete 2 minuti per fare il briefing con il vostro " +
+                        "nuovo team. Il tempo del Livello 2 inizia subito dopo.\"\n\n" +
+                        "Se sei il Project Manager: raggiungi il nuovo gruppo indicato qui sotto e fatti spiegare " +
+                        "rapidamente la situazione dal team. Quando l'handover è completo, premi il pulsante " +
+                        "\"pronto\".\n\n" +
+                        "Se non sei il Project Manager: il tuo gruppo sta per ricevere un nuovo PM. Aiutalo a " +
+                        "inserirsi il più rapidamente possibile: dovrà presentare lui il prossimo modulo."
+        );
         faseRepository.save(fase);
     }
 

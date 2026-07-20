@@ -148,6 +148,51 @@
       />
     }
     </div>
+    } @else if (f.fase?.tipo === 'TURBATIVA') {
+    <div class="briefing-page">
+      <div class="briefing-topbar surface-card">
+        <div>
+          <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+          <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+        </div>
+        <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
+      </div>
+
+      <section class="briefing-card corner-frame">
+        <p class="eyebrow">Imprevisto</p>
+        <h2 class="section-title">Il cambio di scuderia</h2>
+        @for (p of paragrafi(f.contenutoTesto); track $index) {
+        <p class="section-text">{{ p }}</p>
+        }
+      </section>
+
+      <section class="fase-card corner-frame">
+        <div class="my-role-card">
+          <p class="label">Ora sei nel</p>
+          <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+          <p class="label">Il tuo ruolo</p>
+          <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+        </div>
+      </section>
+
+      <section class="briefing-card pronto-card">
+        @if (sonoPM) {
+        @if (mioGruppoStato === 'PRONTO') {
+        <p class="pronto-ok">✓ Handover completato. In attesa degli altri PM...</p>
+        } @else {
+        <button type="button" class="btn-primary" (click)="segnalaPronto()" [disabled]="inviandoPronto()">
+          @if (inviandoPronto()) { Invio... } @else { Ho fatto l'handover, sono pronto → }
+        </button>
+        }
+        } @else {
+        <p class="pronto-wait">
+          Il vostro nuovo Project Manager si sta insediando nel gruppo.
+          @if (mioGruppoStato === 'PRONTO') { Ha già confermato di essere pronto. }
+        </p>
+        }
+        <p class="pronto-count">{{ gruppiPronti }} / {{ totaleGruppi }} gruppi pronti</p>
+      </section>
+    </div>
     } @else {
     <section class="fase-card corner-frame">
       <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
