@@ -21,8 +21,8 @@
           >{{ etichettaStato(invio.statoInvio) }}</span>
         </div>
 
-        @if (invio.minutiExtra > 0) {
-          <p class="tempo-extra">+{{ invio.minutiExtra }} min extra · resta {{ formatTempo(invio.secondiRimanenti) }}</p>
+        @if (invio.minutiExtra > 0 && invio.statoInvio !== 'APPROVATO') {
+        <p class="tempo-extra">+{{ invio.minutiExtra }} min extra · resta {{ formatTempo(invio.secondiRimanenti) }}</p>
         }
 
         <div class="revisione-actions revisione-actions--row">

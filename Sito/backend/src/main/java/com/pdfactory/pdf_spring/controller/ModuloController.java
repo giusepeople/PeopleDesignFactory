@@ -339,22 +339,26 @@ public class ModuloController {
                                                                Giocatore giocatore, InvioModulo invio) {
         List<DomandaModuloDTO> domande = modulo.getDomande().stream().map(this::mapDomanda).toList();
 
+        boolean sonoPM = giocatore.getRuolo() != null && "PM".equals(giocatore.getRuolo().getCodice());
+
         List<RispostaEsistenteDTO> risposteAttuali = invio == null
                 ? List.of()
                 : invio.getRisposte().stream()
                 .map(r -> {
-                    boolean autorizzato = puoModificareDomanda(giocatore, r.getDomanda());
+                    boolean autorizzatoAModificare = puoModificareDomanda(giocatore, r.getDomanda());
+                    // il PM può SEMPRE visualizzare (sola lettura) le risposte di tutti i ruoli
+                    boolean puoVisualizzare = autorizzatoAModificare || sonoPM;
                     boolean presente = r.getTestoRisposta() != null && !r.getTestoRisposta().isBlank();
 
-                    if (autorizzato) {
-                        String hint = Boolean.FALSE.equals(r.getCorretta()) ? r.getDomanda().getHintText() : null;
+                    if (puoVisualizzare) {
+                        String hint = autorizzatoAModificare && Boolean.FALSE.equals(r.getCorretta())
+                                ? r.getDomanda().getHintText() : null;
                         return new RispostaEsistenteDTO(
                                 r.getDomanda().getId(), r.getTestoRisposta(), r.getGiustificazione(),
                                 presente, r.getCorretta(), hint
                         );
                     }
 
-                    // non autorizzato: nessun contenuto, solo il flag di presenza
                     return new RispostaEsistenteDTO(r.getDomanda().getId(), null, null, presente, null, null);
                 })
                 .toList();
@@ -363,7 +367,7 @@ public class ModuloController {
         String motivoRifiuto = invio != null ? invio.getMotivoRifiuto() : null;
         Integer minutiExtra = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
 
-        boolean sonoIoPM = giocatore.getRuolo() != null && "PM".equals(giocatore.getRuolo().getCodice());
+        boolean sonoIoPM = sonoPM;
         String mioRuoloCodice = giocatore.getRuolo() != null ? giocatore.getRuolo().getCodice() : null;
 
         Long secondiRimanenti = null;

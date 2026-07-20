@@ -12,8 +12,8 @@ export class ModuloForm implements OnInit, OnDestroy {
   @Input({ required: true }) giocatoreId!: string;
   @Input({ required: true }) sessionToken!: string;
 
-  // emette i minuti extra correnti del gruppo, cosi la pagina lobby puo' correggere il timer generale
   @Output() minutiExtraChange = new EventEmitter<number>();
+  @Output() invioStatoChange = new EventEmitter<string>();
 
   private gameService = inject(GameService);
 
@@ -25,6 +25,13 @@ export class ModuloForm implements OnInit, OnDestroy {
   inviando = signal(false);
   errorMsg = signal('');
   okMsg = signal('');
+
+  // "Invia risposta" (ruoli non-PM): attivo solo se c'è una modifica non ancora inviata
+  hasUnsavedChanges = signal(false);
+
+  // popup mostrato al PM se mancano risposte di altri ruoli
+  showMissingRolesPopup = signal(false);
+  missingRoles = signal<string[]>([]);
 
   private pollHandle: ReturnType<typeof setInterval> | undefined;
 
@@ -43,6 +50,7 @@ export class ModuloForm implements OnInit, OnDestroy {
         this.applyServerState(resp);
         this.loading.set(false);
         this.minutiExtraChange.emit(resp.minutiExtra ?? 0);
+        this.invioStatoChange.emit(resp.invioStato);
       },
       error: () => {
         this.loading.set(false);
@@ -95,10 +103,14 @@ export class ModuloForm implements OnInit, OnDestroy {
 
   onValueChange(domandaId: string, value: string) {
     this.formValues.update((v) => ({ ...v, [domandaId]: value }));
+    this.hasUnsavedChanges.set(true);
+    this.okMsg.set('');
   }
 
   onGiustificazioneChange(domandaId: string, value: string) {
     this.giustificazioneValues.update((v) => ({ ...v, [domandaId]: value }));
+    this.hasUnsavedChanges.set(true);
+    this.okMsg.set('');
   }
 
   private risposteModificabili(): RispostaInput[] {
@@ -115,7 +127,29 @@ export class ModuloForm implements OnInit, OnDestroy {
       }));
   }
 
-  salvaBozza() {
+  /** Domande che l'utente corrente può compilare (il proprio ruolo, o i campi liberi se PM). */
+  get campiEditabiliMiei(): DomandaModulo[] {
+    const resp = this.modulo();
+    if (!resp) return [];
+    return resp.domande.filter((d) => this.isEditable(d));
+  }
+
+  get haCampiDaCompilare(): boolean {
+    return this.campiEditabiliMiei.length > 0;
+  }
+
+  get sonoIoPM(): boolean {
+    return this.modulo()?.sonoIoPM ?? false;
+  }
+
+  get bloccato(): boolean {
+    const stato = this.modulo()?.invioStato;
+    return stato === 'INVIATO' || stato === 'APPROVATO';
+  }
+
+  // ---------- ruoli non-PM: invio della propria risposta ----------
+
+  inviaRisposta() {
     const risposte = this.risposteModificabili();
     if (risposte.length === 0) return;
 
@@ -126,17 +160,40 @@ export class ModuloForm implements OnInit, OnDestroy {
     this.gameService.salvaRisposteModulo(this.partitaId, this.giocatoreId, this.sessionToken, risposte).subscribe({
       next: () => {
         this.salvando.set(false);
-        this.okMsg.set('Bozza salvata.');
+        this.hasUnsavedChanges.set(false);
+        this.okMsg.set('Risposta inviata.');
         this.refresh();
       },
       error: (err) => {
         this.salvando.set(false);
-        this.errorMsg.set(err.error ?? 'Impossibile salvare la bozza.');
+        this.errorMsg.set(err.error ?? 'Impossibile inviare la risposta.');
       },
     });
   }
 
+  // ---------- Project Manager: invio finale al Game Master ----------
+
   inviaModulo() {
+    const resp = this.modulo();
+    if (!resp) return;
+
+    const ruoliMancanti = new Set<string>();
+    for (const d of resp.domande) {
+      if (this.isEditable(d)) continue;      // campo del PM stesso
+      if (!d.restrictedRoleCodice) continue;  // difensivo: non dovrebbe capitare se non editabile dal PM
+
+      const info = this.rispostaInfo(d.id);
+      if (!info?.rispostaPresente) {
+        ruoliMancanti.add(d.restrictedRoleNome ?? d.assegnataARuoloNome);
+      }
+    }
+
+    if (ruoliMancanti.size > 0) {
+      this.missingRoles.set(Array.from(ruoliMancanti));
+      this.showMissingRolesPopup.set(true);
+      return;
+    }
+
     const risposte = this.risposteModificabili();
 
     this.inviando.set(true);
@@ -156,12 +213,7 @@ export class ModuloForm implements OnInit, OnDestroy {
     });
   }
 
-  get sonoIoPM(): boolean {
-    return this.modulo()?.sonoIoPM ?? false;
-  }
-
-  get bloccato(): boolean {
-    const stato = this.modulo()?.invioStato;
-    return stato === 'INVIATO' || stato === 'APPROVATO';
+  chiudiMissingRolesPopup() {
+    this.showMissingRolesPopup.set(false);
   }
 }

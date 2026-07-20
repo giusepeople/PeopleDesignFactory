@@ -52,3 +52,20 @@
   border-radius: var(--radius-sm);
 }
 .domanda-assegnata { background: var(--paper-0); border-radius: var(--radius-sm); padding: 10px 12px; }
+.risposta-readonly { background: var(--paper-100); border-radius: var(--radius-sm); padding: 10px 12px; }
+.risposta-readonly-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-500);
+  margin: 0 0 6px;
+}
+.risposta-readonly-testo { font-size: 13.5px; color: var(--ink-900); white-space: pre-wrap; margin: 0; }
+.risposta-readonly-giust { font-size: 12.5px; color: var(--ink-500); font-style: italic; margin: 6px 0 0; }
+.risposta-readonly-vuota { font-size: 13px; color: var(--ink-500); font-style: italic; margin: 0; }
+
+.modal-title--danger { color: var(--redline-600); }
+.missing-roles-list { margin: 0 0 16px; padding-left: 20px; font-size: 13.5px; color: var(--ink-700); }
+.missing-roles-list li { padding: 3px 0; font-weight: 600; }

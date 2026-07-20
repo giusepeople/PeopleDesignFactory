@@ -118,14 +118,16 @@
       </section>
     </div>
     } @else if (f.fase?.tipo === 'LIVELLO') {
-    <div class="briefing-page">
-      <div class="briefing-topbar surface-card">
-        <div>
-          <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
-          <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+      <div class="briefing-page">
+        <div class="briefing-topbar surface-card">
+          <div>
+            <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+            <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+          </div>
+          @if (moduloInvioStato() !== 'APPROVATO') {
+            <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
+          }
         </div>
-        <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
-      </div>
 
       <section class="fase-card corner-frame">
         <div class="my-role-card">
@@ -136,10 +138,15 @@
         </div>
       </section>
 
-      @if (session(); as sess) {
-      <app-modulo-form [partitaId]="partitaId" [giocatoreId]="sess.giocatoreId" [sessionToken]="sess.sessionToken"
-        (minutiExtraChange)="onMinutiExtra($event)" />
-      }
+    @if (session(); as sess) {
+      <app-modulo-form
+        [partitaId]="partitaId"
+        [giocatoreId]="sess.giocatoreId"
+        [sessionToken]="sess.sessionToken"
+        (minutiExtraChange)="onMinutiExtra($event)"
+        (invioStatoChange)="onInvioStato($event)"
+      />
+    }
     </div>
     } @else {
     <section class="fase-card corner-frame">

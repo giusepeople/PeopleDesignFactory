@@ -91,6 +91,12 @@ export class Lobby implements OnInit, OnDestroy {
     });
   }
 
+  moduloInvioStato = signal<string | null>(null);
+
+  onInvioStato(stato: string) {
+    this.moduloInvioStato.set(stato);
+  }
+
 
   onMinutiExtra(v: number) {
     this.moduloMinutiExtra.set(v);

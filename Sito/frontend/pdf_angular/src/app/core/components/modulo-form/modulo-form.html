@@ -99,10 +99,24 @@
               ></textarea>
             }
 
+          } @else if (sonoIoPM) {
+            <!-- Il PM vede in sola lettura le risposte compilate dagli altri ruoli -->
+            <div class="risposta-readonly">
+              <p class="risposta-readonly-label">Risposta di {{ d.restrictedRoleNome ?? d.assegnataARuoloNome }}</p>
+              @if (rispostaInfo(d.id)?.testoRisposta) {
+                <p class="risposta-readonly-testo">{{ rispostaInfo(d.id)?.testoRisposta }}</p>
+                @if (rispostaInfo(d.id)?.giustificazione) {
+                  <p class="risposta-readonly-giust">{{ rispostaInfo(d.id)?.giustificazione }}</p>
+                }
+              } @else {
+                <p class="risposta-readonly-vuota">In attesa della risposta di {{ d.restrictedRoleNome ?? d.assegnataARuoloNome }}...</p>
+              }
+            </div>
+
           } @else {
             <div class="domanda-assegnata">
               <p class="hint-text">Questa domanda è assegnata a <strong>{{ d.assegnataARuoloNome }}</strong>.</p>
-              @if (rispostaInfo(d.id)?.rispostaPresente) {
+              @if (m.invioStato !== 'RIFIUTATO' && rispostaInfo(d.id)?.rispostaPresente) {
                 <p class="ok-text">✓ Risposta fornita</p>
               }
             </div>
@@ -115,19 +129,38 @@
     @if (okMsg()) { <p class="ok-text">{{ okMsg() }}</p> }
 
     <div class="modulo-actions">
-      @if (!bloccato) {
-        <button type="button" class="btn-secondary" (click)="salvaBozza()" [disabled]="salvando()">
-          @if (salvando()) { Salvataggio... } @else { Salva bozza }
-        </button>
-      }
       @if (sonoIoPM && !bloccato) {
         <button type="button" class="btn-primary" (click)="inviaModulo()" [disabled]="inviando()">
           @if (inviando()) { Invio... } @else { Invia al Game Master → }
         </button>
       }
+
+      @if (!sonoIoPM && haCampiDaCompilare && !bloccato) {
+        <button type="button" class="btn-secondary" (click)="inviaRisposta()" [disabled]="salvando() || !hasUnsavedChanges()">
+          @if (salvando()) { Invio... } @else { Invia risposta }
+        </button>
+      }
+
       @if (!sonoIoPM && !bloccato) {
         <p class="pm-hint">Solo il Project Manager può inviare il modulo al Game Master.</p>
       }
+    </div>
+  }
+
+  @if (showMissingRolesPopup()) {
+    <div class="modal-backdrop" (click)="chiudiMissingRolesPopup()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" (click)="chiudiMissingRolesPopup()" aria-label="Chiudi">✕</button>
+        <p class="eyebrow">Invio non disponibile</p>
+        <h2 class="modal-title modal-title--danger">Mancano alcune risposte</h2>
+        <p class="section-text">Il sistema è ancora in attesa del contributo di:</p>
+        <ul class="missing-roles-list">
+          @for (ruolo of missingRoles(); track ruolo) {
+            <li>{{ ruolo }}</li>
+          }
+        </ul>
+        <button type="button" class="btn-primary btn-block" (click)="chiudiMissingRolesPopup()">Ho capito</button>
+      </div>
     </div>
   }
 </section>
