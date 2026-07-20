@@ -18,11 +18,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Gestisce il ciclo di vita del "Foglio Risposta" di ogni Livello (fase di tipo LIVELLO):
- * compilazione collaborativa (con eventuali campi riservati a un ruolo specifico),
- * invio da parte del PM e revisione (approvazione / rifiuto con motivo e tempo extra) da parte del GM.
- */
 @RestController
 @RequestMapping("/games")
 public class ModuloController {
@@ -36,6 +31,8 @@ public class ModuloController {
     private final RispostaRepository rispostaRepository;
     private final GameMasterRepository gameMasterRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final int MINUTI_EXTRA_AUTOMATICI_HINT = 5;
 
     public ModuloController(PartitaRepository partitaRepository, GiocatoreRepository giocatoreRepository,
                             GruppoRepository gruppoRepository, ModuloRepository moduloRepository,
@@ -151,7 +148,6 @@ public class ModuloController {
 
         List<RispostaInputDTO> risposteInput = request.risposte() != null ? request.risposte() : List.of();
 
-        // validazione preventiva di tutte le risposte prima di scrivere qualunque cosa
         for (RispostaInputDTO input : risposteInput) {
             Domanda domanda = domandaRepository.findById(input.domandaId()).orElse(null);
             if (domanda == null || !domanda.getModuloTemplate().getId().equals(modulo.getId())) {
@@ -176,14 +172,26 @@ public class ModuloController {
                     });
 
             risposta.setTestoRisposta(input.testoRisposta());
+            risposta.setGiustificazione(input.giustificazione());
             risposta.setRispostoDa(giocatore);
 
             if (domanda.getType() == TipoDomanda.SCELTA_MULTIPLA && domanda.getOpzioneCorretta() != null) {
-                risposta.setCorretta(domanda.getOpzioneCorretta().equals(input.testoRisposta()));
+                boolean corretta = domanda.getOpzioneCorretta().equals(input.testoRisposta());
+                risposta.setCorretta(corretta);
+
+                // hint + 5 minuti extra automatici alla PRIMA risposta sbagliata a questa domanda
+                if (!corretta && !Boolean.TRUE.equals(risposta.getHintUsato())) {
+                    risposta.setHintUsato(true);
+                    int attuali = invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+                    invio.setMinutiExtra(attuali + MINUTI_EXTRA_AUTOMATICI_HINT);
+                }
             }
 
             rispostaRepository.save(risposta);
         }
+
+        // persiste eventuali minuti extra automatici assegnati sopra
+        invioModuloRepository.save(invio);
 
         if (finalizza) {
             for (Domanda domanda : modulo.getDomande()) {
@@ -234,7 +242,7 @@ public class ModuloController {
         List<InvioModuloGmDTO> response = gruppi.stream()
                 .map(gr -> {
                     InvioModulo invio = invioModuloRepository.findByGruppoIdAndModuloId(gr.getId(), modulo.getId()).orElse(null);
-                    return buildInvioModuloGmDTO(gr, modulo, invio);
+                    return buildInvioModuloGmDTO(partita, fase, gr, modulo, invio);
                 })
                 .toList();
 
@@ -334,7 +342,21 @@ public class ModuloController {
         List<RispostaEsistenteDTO> risposteAttuali = invio == null
                 ? List.of()
                 : invio.getRisposte().stream()
-                .map(r -> new RispostaEsistenteDTO(r.getDomanda().getId(), r.getTestoRisposta()))
+                .map(r -> {
+                    boolean autorizzato = puoModificareDomanda(giocatore, r.getDomanda());
+                    boolean presente = r.getTestoRisposta() != null && !r.getTestoRisposta().isBlank();
+
+                    if (autorizzato) {
+                        String hint = Boolean.FALSE.equals(r.getCorretta()) ? r.getDomanda().getHintText() : null;
+                        return new RispostaEsistenteDTO(
+                                r.getDomanda().getId(), r.getTestoRisposta(), r.getGiustificazione(),
+                                presente, r.getCorretta(), hint
+                        );
+                    }
+
+                    // non autorizzato: nessun contenuto, solo il flag di presenza
+                    return new RispostaEsistenteDTO(r.getDomanda().getId(), null, null, presente, null, null);
+                })
                 .toList();
 
         String invioStato = invio == null ? "BOZZA" : invio.getStato().name();
@@ -353,13 +375,14 @@ public class ModuloController {
         }
 
         return new ModuloCorrenteResponse(
-                modulo.getId(), modulo.getTitolo(), domande, risposteAttuali,
+                modulo.getId(), modulo.getTitolo(), fase.getContenutoTesto(), parseDati(fase.getDatiJson()),
+                domande, risposteAttuali,
                 invioStato, motivoRifiuto, minutiExtra, sonoIoPM, mioRuoloCodice,
                 secondiRimanenti, adesso
         );
     }
 
-    private InvioModuloGmDTO buildInvioModuloGmDTO(Gruppo gruppo, Modulo modulo, InvioModulo invio) {
+    private InvioModuloGmDTO buildInvioModuloGmDTO(Partita partita, Fase fase, Gruppo gruppo, Modulo modulo, InvioModulo invio) {
         List<RispostaGmDTO> risposte = modulo.getDomande().stream()
                 .map(d -> {
                     Risposta r = invio == null ? null
@@ -367,6 +390,7 @@ public class ModuloController {
                     return new RispostaGmDTO(
                             d.getId(), d.getOrderIndex(), d.getText(), d.getType().name(),
                             r != null ? r.getTestoRisposta() : null,
+                            r != null ? r.getGiustificazione() : null,
                             r != null ? r.getCorretta() : null,
                             d.getOpzioneCorretta(),
                             d.getHintText(),
@@ -374,6 +398,15 @@ public class ModuloController {
                     );
                 })
                 .toList();
+
+        Integer minutiExtra = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+
+        Long secondiRimanenti = null;
+        if (partita.getFaseIniziataIl() != null) {
+            long durataSec = (fase.getDefaultDurataMinuti() + minutiExtra) * 60L;
+            long trascorsi = Instant.now().getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
+            secondiRimanenti = Math.max(0, durataSec - trascorsi);
+        }
 
         return new InvioModuloGmDTO(
                 invio != null ? invio.getId() : null,
@@ -383,17 +416,23 @@ public class ModuloController {
                 invio != null ? invio.getStato().name() : "BOZZA",
                 invio != null ? invio.getInviatoIl() : null,
                 invio != null ? invio.getMotivoRifiuto() : null,
-                invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0,
+                minutiExtra,
+                secondiRimanenti,
                 risposte
         );
     }
 
     private DomandaModuloDTO mapDomanda(Domanda d) {
+        String assegnataA = d.getRestrictedRole() != null ? d.getRestrictedRole().getNome() : "Project Manager";
+        boolean richiedeGiustificazione = d.getType() == TipoDomanda.SCELTA_MULTIPLA && d.getOpzioneCorretta() != null;
+
         return new DomandaModuloDTO(
                 d.getId(), d.getOrderIndex(), d.getType().name(), d.getText(),
                 parseOpzioni(d.getOpzioneJson()),
                 d.getRestrictedRole() != null ? d.getRestrictedRole().getCodice() : null,
-                d.getRestrictedRole() != null ? d.getRestrictedRole().getNome() : null
+                d.getRestrictedRole() != null ? d.getRestrictedRole().getNome() : null,
+                assegnataA,
+                richiedeGiustificazione
         );
     }
 
@@ -403,6 +442,15 @@ public class ModuloController {
             return objectMapper.readValue(json, new TypeReference<List<OpzioneDTO>>() {});
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private List<DatoBriefingDTO> parseDati(String datiJson) {
+        if (datiJson == null || datiJson.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(datiJson, new TypeReference<List<DatoBriefingDTO>>() {});
+        } catch (Exception e) {
+            return List.of();
         }
     }
 }

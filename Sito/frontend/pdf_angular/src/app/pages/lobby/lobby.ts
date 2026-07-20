@@ -58,7 +58,7 @@ export class Lobby implements OnInit, OnDestroy {
         );
         this.ruoli.set(ordinati);
       },
-      error: () => {},
+      error: () => { },
     });
 
     this.refresh();
@@ -71,6 +71,8 @@ export class Lobby implements OnInit, OnDestroy {
     if (this.tickHandle) clearInterval(this.tickHandle);
   }
 
+  moduloMinutiExtra = signal(0);
+
   refresh() {
     this.gameService.getState(this.partitaId).subscribe({
       next: (s) => this.state.set(s),
@@ -80,11 +82,24 @@ export class Lobby implements OnInit, OnDestroy {
     this.gameService.getFaseCorrente(this.partitaId).subscribe({
       next: (f) => {
         this.faseCorrente.set(f);
-        this.countdown.aggiorna(f.faseIniziataIl, f.fase?.durataMinuti, f.serverTimestamp);
+        const extra = f.fase?.tipo === 'LIVELLO' ? this.moduloMinutiExtra() : 0;
+        const durata = (f.fase?.durataMinuti ?? 0) + extra;
+        this.countdown.aggiorna(f.faseIniziataIl, durata, f.serverTimestamp);
         this.secondiVisualizzati.set(this.countdown.secondiRimanenti());
       },
-      error: () => {},
+      error: () => { },
     });
+  }
+
+
+  onMinutiExtra(v: number) {
+    this.moduloMinutiExtra.set(v);
+    const f = this.faseCorrente();
+    if (f?.fase?.tipo === 'LIVELLO') {
+      const durata = (f.fase?.durataMinuti ?? 0) + v;
+      this.countdown.aggiorna(f.faseIniziataIl, durata, f.serverTimestamp);
+      this.secondiVisualizzati.set(this.countdown.secondiRimanenti());
+    }
   }
 
   private tick() {
@@ -97,12 +112,15 @@ export class Lobby implements OnInit, OnDestroy {
 
   get percentTrascorso(): number {
     const rimanenti = this.secondiVisualizzati();
-    const durata = this.faseCorrente()?.fase?.durataMinuti;
+    const f = this.faseCorrente();
+    const extra = f?.fase?.tipo === 'LIVELLO' ? this.moduloMinutiExtra() : 0;
+    const durata = (f?.fase?.durataMinuti ?? 0) + extra;
     if (rimanenti === null || rimanenti === undefined || !durata) return 0;
     const totale = durata * 60;
     if (totale <= 0) return 0;
     return Math.min(100, Math.max(0, ((totale - rimanenti) / totale) * 100));
   }
+
 
   get me() {
     const sess = this.session();

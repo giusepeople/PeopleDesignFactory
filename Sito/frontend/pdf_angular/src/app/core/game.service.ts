@@ -129,24 +129,32 @@ export interface Opzione {
 export interface DomandaModulo {
   id: string;
   orderIndex: number;
-  type: string; // SCELTA_MULTIPLA | APERTA
+  type: string;
   text: string;
   opzioni: Opzione[] | null;
   restrictedRoleCodice: string | null;
   restrictedRoleNome: string | null;
+  assegnataARuoloNome: string;
+  richiedeGiustificazione: boolean;
 }
 
 export interface RispostaEsistente {
   domandaId: string;
   testoRisposta: string | null;
+  giustificazione: string | null;
+  rispostaPresente: boolean;
+  corretta: boolean | null;
+  hintDaMostrare: string | null;
 }
 
 export interface ModuloCorrenteResponse {
   moduloId: string;
   titolo: string;
+  contenutoTesto: string | null;
+  dati: DatoBriefing[];
   domande: DomandaModulo[];
   risposteAttuali: RispostaEsistente[];
-  invioStato: string; // BOZZA | INVIATO | APPROVATO | RIFIUTATO
+  invioStato: string;
   motivoRifiuto: string | null;
   minutiExtra: number;
   sonoIoPM: boolean;
@@ -154,10 +162,10 @@ export interface ModuloCorrenteResponse {
   secondiRimanenti: number | null;
   serverTimestamp: string | null;
 }
-
 export interface RispostaInput {
   domandaId: string;
   testoRisposta: string;
+  giustificazione: string;
 }
 
 export interface RispostaGm {
@@ -166,6 +174,7 @@ export interface RispostaGm {
   domandaTesto: string;
   tipo: string;
   testoRisposta: string | null;
+  giustificazione: string | null;
   corretta: boolean | null;
   opzioneCorretta: string | null;
   hintText: string | null;
@@ -181,6 +190,7 @@ export interface InvioModuloGm {
   inviatoIl: string | null;
   motivoRifiuto: string | null;
   minutiExtra: number;
+  secondiRimanenti: number | null;
   risposte: RispostaGm[];
 }
 

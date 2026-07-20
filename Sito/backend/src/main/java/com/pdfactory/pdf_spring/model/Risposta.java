@@ -33,7 +33,6 @@ public class Risposta {
     @JoinColumn(name = "domanda_id", nullable = false)
     private Domanda domanda;
 
-    // chi del gruppo ha materialmente scritto/selezionato la risposta
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "risposto_da_giocatore_id")
     private Giocatore rispostoDa;
@@ -41,10 +40,13 @@ public class Risposta {
     @Column(name = "testo_risposta", columnDefinition = "TEXT")
     private String testoRisposta;
 
+    // motivazione testuale abbinata (es. giustificazione della scelta multipla)
+    @Column(name = "giustificazione", columnDefinition = "TEXT")
+    private String giustificazione;
+
     @Column(name = "hint_usato", nullable = false)
     private Boolean hintUsato = false;
 
-    // nullable: ha senso solo per le domande MULTIPLE_CHOICE
     @Column(name = "corretta")
     private Boolean corretta;
 }

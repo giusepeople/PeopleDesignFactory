@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { GameService, ModuloCorrenteResponse, DomandaModulo, RispostaInput } from '../../game.service';
 
 @Component({
@@ -12,10 +12,14 @@ export class ModuloForm implements OnInit, OnDestroy {
   @Input({ required: true }) giocatoreId!: string;
   @Input({ required: true }) sessionToken!: string;
 
+  // emette i minuti extra correnti del gruppo, cosi la pagina lobby puo' correggere il timer generale
+  @Output() minutiExtraChange = new EventEmitter<number>();
+
   private gameService = inject(GameService);
 
   modulo = signal<ModuloCorrenteResponse | null>(null);
   formValues = signal<Record<string, string>>({});
+  giustificazioneValues = signal<Record<string, string>>({});
   loading = signal(true);
   salvando = signal(false);
   inviando = signal(false);
@@ -38,6 +42,7 @@ export class ModuloForm implements OnInit, OnDestroy {
       next: (resp) => {
         this.applyServerState(resp);
         this.loading.set(false);
+        this.minutiExtraChange.emit(resp.minutiExtra ?? 0);
       },
       error: () => {
         this.loading.set(false);
@@ -46,24 +51,30 @@ export class ModuloForm implements OnInit, OnDestroy {
     });
   }
 
-  // Mantiene i valori digitati dall'utente nei propri campi editabili;
-  // aggiorna invece sempre i campi compilati dagli altri membri del gruppo (collaborazione in tempo quasi reale).
   private applyServerState(resp: ModuloCorrenteResponse) {
     this.modulo.set(resp);
+
     const risposteMap = new Map(resp.risposteAttuali.map((r) => [r.domandaId, r.testoRisposta ?? '']));
-    const attuali = this.formValues();
-    const next: Record<string, string> = {};
+    const giustMap = new Map(resp.risposteAttuali.map((r) => [r.domandaId, r.giustificazione ?? '']));
+    const attualiVal = this.formValues();
+    const attualiGiust = this.giustificazioneValues();
+    const nextVal: Record<string, string> = {};
+    const nextGiust: Record<string, string> = {};
 
     for (const d of resp.domande) {
       const mioCampo = this.isEditable(d, resp);
-      if (mioCampo && attuali[d.id] !== undefined) {
-        next[d.id] = attuali[d.id];
-      } else {
-        next[d.id] = risposteMap.get(d.id) ?? '';
-      }
+
+      nextVal[d.id] = mioCampo && attualiVal[d.id] !== undefined
+        ? attualiVal[d.id]
+        : (risposteMap.get(d.id) ?? '');
+
+      nextGiust[d.id] = mioCampo && attualiGiust[d.id] !== undefined
+        ? attualiGiust[d.id]
+        : (giustMap.get(d.id) ?? '');
     }
 
-    this.formValues.set(next);
+    this.formValues.set(nextVal);
+    this.giustificazioneValues.set(nextGiust);
   }
 
   isEditable(d: DomandaModulo, resp: ModuloCorrenteResponse | null = this.modulo()): boolean {
@@ -73,17 +84,35 @@ export class ModuloForm implements OnInit, OnDestroy {
     return resp.sonoIoPM;
   }
 
+  rispostaInfo(domandaId: string) {
+    return this.modulo()?.risposteAttuali.find((r) => r.domandaId === domandaId) ?? null;
+  }
+
+  paragrafi(testo: string | null | undefined): string[] {
+    if (!testo) return [];
+    return testo.split('\n\n').filter((p) => p.trim().length > 0);
+  }
+
   onValueChange(domandaId: string, value: string) {
     this.formValues.update((v) => ({ ...v, [domandaId]: value }));
+  }
+
+  onGiustificazioneChange(domandaId: string, value: string) {
+    this.giustificazioneValues.update((v) => ({ ...v, [domandaId]: value }));
   }
 
   private risposteModificabili(): RispostaInput[] {
     const resp = this.modulo();
     if (!resp) return [];
     const values = this.formValues();
+    const giust = this.giustificazioneValues();
     return resp.domande
       .filter((d) => this.isEditable(d))
-      .map((d) => ({ domandaId: d.id, testoRisposta: values[d.id] ?? '' }));
+      .map((d) => ({
+        domandaId: d.id,
+        testoRisposta: values[d.id] ?? '',
+        giustificazione: d.richiedeGiustificazione ? (giust[d.id] ?? '') : '',
+      }));
   }
 
   salvaBozza() {

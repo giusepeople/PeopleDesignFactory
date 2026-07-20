@@ -40,3 +40,15 @@
 
 .modulo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
 .pm-hint { font-size: 13px; color: var(--ink-500); margin: 0; }
+
+.dati-diagnostica { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed var(--line); }
+.hint-banner {
+  margin-top: 10px;
+  background: var(--brass-50);
+  color: var(--brass-500);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+.domanda-assegnata { background: var(--paper-0); border-radius: var(--radius-sm); padding: 10px 12px; }

@@ -2,6 +2,26 @@
   @if (loading()) {
     <p class="loading-text">Caricamento del foglio risposta...</p>
   } @else if (modulo(); as m) {
+
+    @if (m.contenutoTesto || m.dati.length > 0) {
+      <div class="dati-diagnostica">
+        <p class="eyebrow">Dati disponibili</p>
+        @for (p of paragrafi(m.contenutoTesto); track $index) {
+          <p class="section-text">{{ p }}</p>
+        }
+        @if (m.dati.length > 0) {
+          <div class="data-grid">
+            @for (d of m.dati; track d.label) {
+              <div class="data-item">
+                <p class="data-item-label">{{ d.label }}</p>
+                <p class="data-item-value">{{ d.valore }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <p class="eyebrow">Foglio risposta</p>
     <h2 class="section-title">{{ m.titolo }}</h2>
 
@@ -38,34 +58,54 @@
           </p>
           <p class="domanda-text">{{ d.text }}</p>
 
-          @if (d.type === 'SCELTA_MULTIPLA') {
-            <div class="opzioni-list">
-              @for (o of d.opzioni; track o.valore) {
-                <label class="opzione-item" [class.opzione-item--disabled]="!isEditable(d)">
-                  <input
-                    type="radio"
-                    [name]="d.id"
-                    [value]="o.valore"
-                    [checked]="formValues()[d.id] === o.valore"
-                    [disabled]="!isEditable(d)"
-                    (change)="onValueChange(d.id, o.valore)"
-                  />
-                  <span><strong>{{ o.valore }}.</strong> {{ o.etichetta }}</span>
-                </label>
+          @if (isEditable(d)) {
+
+            @if (d.type === 'SCELTA_MULTIPLA') {
+              <div class="opzioni-list">
+                @for (o of d.opzioni; track o.valore) {
+                  <label class="opzione-item">
+                    <input
+                      type="radio"
+                      [name]="d.id"
+                      [value]="o.valore"
+                      [checked]="formValues()[d.id] === o.valore"
+                      (change)="onValueChange(d.id, o.valore)"
+                    />
+                    <span><strong>{{ o.valore }}.</strong> {{ o.etichetta }}</span>
+                  </label>
+                }
+              </div>
+
+              @if (d.richiedeGiustificazione) {
+                <textarea
+                  class="field domanda-textarea"
+                  rows="3"
+                  placeholder="Motiva la scelta in 3-5 righe..."
+                  [value]="giustificazioneValues()[d.id] ?? ''"
+                  (input)="onGiustificazioneChange(d.id, $any($event.target).value)"
+                ></textarea>
+              }
+
+              @if (rispostaInfo(d.id)?.hintDaMostrare; as hint) {
+                <p class="hint-banner">💡 {{ hint }}</p>
+              }
+
+            } @else {
+              <textarea
+                class="field domanda-textarea"
+                rows="3"
+                [value]="formValues()[d.id] ?? ''"
+                (input)="onValueChange(d.id, $any($event.target).value)"
+              ></textarea>
+            }
+
+          } @else {
+            <div class="domanda-assegnata">
+              <p class="hint-text">Questa domanda è assegnata a <strong>{{ d.assegnataARuoloNome }}</strong>.</p>
+              @if (rispostaInfo(d.id)?.rispostaPresente) {
+                <p class="ok-text">✓ Risposta fornita</p>
               }
             </div>
-          } @else {
-            <textarea
-              class="field domanda-textarea"
-              rows="3"
-              [disabled]="!isEditable(d)"
-              [value]="formValues()[d.id] ?? ''"
-              (input)="onValueChange(d.id, $any($event.target).value)"
-            ></textarea>
-          }
-
-          @if (!isEditable(d) && d.restrictedRoleCodice && !bloccato) {
-            <p class="hint-text">Questo campo può essere compilato solo da chi ha il ruolo {{ d.restrictedRoleNome }}.</p>
           }
         </div>
       }

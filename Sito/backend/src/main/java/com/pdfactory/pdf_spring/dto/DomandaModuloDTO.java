@@ -10,5 +10,7 @@ public record DomandaModuloDTO(
         String text,
         List<OpzioneDTO> opzioni,
         String restrictedRoleCodice,
-        String restrictedRoleNome
+        String restrictedRoleNome,
+        String assegnataARuoloNome,     // nome ruolo visibile a tutti (anche se non ristretta -> "Project Manager")
+        boolean richiedeGiustificazione // true per le scelte multiple valutate (es. D1)
 ) {}

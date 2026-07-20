@@ -8,6 +8,7 @@ public record RispostaGmDTO(
         String domandaTesto,
         String tipo,
         String testoRisposta,
+        String giustificazione,
         Boolean corretta,
         String opzioneCorretta,
         String hintText,

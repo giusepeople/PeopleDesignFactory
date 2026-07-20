@@ -13,5 +13,6 @@ public record InvioModuloGmDTO(
         Instant inviatoIl,
         String motivoRifiuto,
         Integer minutiExtra,
+        Long secondiRimanenti,
         List<RispostaGmDTO> risposte
 ) {}

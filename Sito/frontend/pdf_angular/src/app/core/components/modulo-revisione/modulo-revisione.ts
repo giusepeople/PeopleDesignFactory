@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy, signal, inject } from '@angular/core';
-import { GameService, InvioModuloGm } from '../../game.service';
+import { GameService, InvioModuloGm, GruppoDettaglio } from '../../game.service';
 
 @Component({
   selector: 'app-modulo-revisione',
@@ -9,6 +9,7 @@ import { GameService, InvioModuloGm } from '../../game.service';
 })
 export class ModuloRevisione implements OnInit, OnDestroy {
   @Input({ required: true }) partitaId!: string;
+  @Input() gruppiDettaglio: GruppoDettaglio[] = [];
 
   private gameService = inject(GameService);
 
@@ -16,6 +17,9 @@ export class ModuloRevisione implements OnInit, OnDestroy {
   loading = signal(true);
   errorMsg = signal('');
   processando = signal<string | null>(null);
+
+  vedendoGruppo = signal<string | null>(null);
+  infoGruppo = signal<string | null>(null);
   gruppoInRifiuto = signal<string | null>(null);
   motivoRifiuto = signal('');
   minutiExtra = signal(5);
@@ -43,6 +47,23 @@ export class ModuloRevisione implements OnInit, OnDestroy {
       },
     });
   }
+
+  membriDi(gruppoId: string) {
+    return this.gruppiDettaglio.find((g) => g.id === gruppoId)?.giocatori ?? [];
+  }
+
+  formatTempo(secondi: number | null): string {
+    if (secondi === null || secondi === undefined) return '--:--';
+    const m = Math.floor(secondi / 60);
+    const s = secondi % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  apriVedi(invio: InvioModuloGm) { this.vedendoGruppo.set(invio.gruppoId); }
+  chiudiVedi() { this.vedendoGruppo.set(null); }
+
+  apriInfo(invio: InvioModuloGm) { this.infoGruppo.set(invio.gruppoId); }
+  chiudiInfo() { this.infoGruppo.set(null); }
 
   approva(invio: InvioModuloGm) {
     if (!invio.invioId) return;

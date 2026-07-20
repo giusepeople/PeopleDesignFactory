@@ -21,49 +21,100 @@
           >{{ etichettaStato(invio.statoInvio) }}</span>
         </div>
 
-        <div class="risposte-list">
-          @for (r of invio.risposte; track r.domandaId) {
-            <div class="risposta-item">
-              <p class="risposta-domanda">
-                Q{{ r.orderIndex }}. {{ r.domandaTesto }}
-                @if (r.corretta === true) { <span class="chip chip--green">corretta</span> }
-                @if (r.corretta === false) { <span class="chip chip--red">errata</span> }
-              </p>
-              <p class="risposta-testo">{{ r.testoRisposta || '—' }}</p>
-              @if (r.rispostoDaNickname) {
-                <p class="risposta-autore">{{ r.rispostoDaNickname }}</p>
-              }
-            </div>
-          }
+        @if (invio.minutiExtra > 0) {
+          <p class="tempo-extra">+{{ invio.minutiExtra }} min extra · resta {{ formatTempo(invio.secondiRimanenti) }}</p>
+        }
+
+        <div class="revisione-actions revisione-actions--row">
+          <button type="button" class="btn-secondary" (click)="apriVedi(invio)">Vedi</button>
+          <button type="button" class="btn-secondary" (click)="apriInfo(invio)">Info</button>
         </div>
 
         @if (invio.statoInvio === 'INVIATO') {
-          @if (gruppoInRifiuto() === invio.gruppoId) {
-            <div class="rifiuto-form">
-              <label class="field-label">Motivo del rifiuto / hint per il gruppo</label>
-              <textarea class="field" rows="2" [value]="motivoRifiuto()" (input)="onMotivoInput($event)"></textarea>
-              <label class="field-label">Minuti extra concessi</label>
-              <input class="field" type="number" min="0" [value]="minutiExtra()" (input)="onMinutiInput($event)" />
-              <div class="rifiuto-actions">
-                <button type="button" class="btn-secondary" (click)="annullaRifiuta()">Annulla</button>
+          <div class="revisione-actions">
+            <button type="button" class="btn-secondary" (click)="apriRifiuta(invio)" [disabled]="processando() === invio.invioId">Rifiuta</button>
+            <button type="button" class="btn-primary" (click)="approva(invio)" [disabled]="processando() === invio.invioId">
+              @if (processando() === invio.invioId) { Approvazione... } @else { Approva → }
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (vedendoGruppo(); as gId) {
+    <div class="modal-backdrop" (click)="chiudiVedi()">
+      <div class="modal-card corner-frame" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" (click)="chiudiVedi()" aria-label="Chiudi">✕</button>
+        @for (invio of gruppi(); track invio.gruppoId) {
+          @if (invio.gruppoId === gId) {
+            <p class="eyebrow">Gruppo {{ invio.teamNum }}</p>
+            <h2 class="modal-title">Foglio risposta</h2>
+            <div class="risposte-list">
+              @for (r of invio.risposte; track r.domandaId) {
+                <div class="risposta-item">
+                  <p class="risposta-domanda">
+                    Q{{ r.orderIndex }}. {{ r.domandaTesto }}
+                    @if (r.corretta === true) { <span class="chip chip--green">corretta</span> }
+                    @if (r.corretta === false) { <span class="chip chip--red">errata</span> }
+                  </p>
+                  <p class="risposta-testo">{{ r.testoRisposta || '—' }}</p>
+                  @if (r.giustificazione) {
+                    <p class="risposta-giustificazione">{{ r.giustificazione }}</p>
+                  }
+                  @if (r.rispostoDaNickname) {
+                    <p class="risposta-autore">{{ r.rispostoDaNickname }}</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  @if (infoGruppo(); as gId) {
+    <div class="modal-backdrop" (click)="chiudiInfo()">
+      <div class="modal-card corner-frame" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" (click)="chiudiInfo()" aria-label="Chiudi">✕</button>
+        <p class="eyebrow">Partecipanti</p>
+        <h2 class="modal-title">Gruppo</h2>
+        <ul class="group-members">
+          @for (m of membriDi(gId); track m.id) {
+            <li>{{ m.nickname }} <span class="ruolo-tag">{{ m.ruoloNome }}</span></li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+
+  @if (gruppoInRifiuto(); as gId) {
+    <div class="modal-backdrop" (click)="annullaRifiuta()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" (click)="annullaRifiuta()" aria-label="Chiudi">✕</button>
+        <p class="eyebrow">Rifiuta modulo</p>
+        <h2 class="modal-title">Gruppo</h2>
+        <div class="rifiuto-form">
+          <label class="field-label">Motivo del rifiuto / hint per il gruppo</label>
+          <textarea class="field" rows="3" [value]="motivoRifiuto()" (input)="onMotivoInput($event)"></textarea>
+          <label class="field-label">Minuti extra concessi</label>
+          <input class="field" type="number" min="0" [value]="minutiExtra()" (input)="onMinutiInput($event)" />
+          <div class="rifiuto-actions">
+            <button type="button" class="btn-secondary" (click)="annullaRifiuta()">Annulla</button>
+            @for (invio of gruppi(); track invio.gruppoId) {
+              @if (invio.gruppoId === gId) {
                 <button
                   type="button"
                   class="btn-danger"
                   (click)="confermaRifiuta(invio)"
                   [disabled]="processando() === invio.invioId || !motivoRifiuto().trim()"
                 >Conferma rifiuto</button>
-              </div>
-            </div>
-          } @else {
-            <div class="revisione-actions">
-              <button type="button" class="btn-secondary" (click)="apriRifiuta(invio)" [disabled]="processando() === invio.invioId">Rifiuta</button>
-              <button type="button" class="btn-primary" (click)="approva(invio)" [disabled]="processando() === invio.invioId">
-                @if (processando() === invio.invioId) { Approvazione... } @else { Approva → }
-              </button>
-            </div>
-          }
-        }
+              }
+            }
+          </div>
+        </div>
       </div>
-    }
-  </div>
+    </div>
+  }
 </section>

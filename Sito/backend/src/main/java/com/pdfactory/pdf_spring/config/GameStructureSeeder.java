@@ -43,6 +43,7 @@ public class GameStructureSeeder implements CommandLineRunner {
         creaFase(7, "Debrief", TipoFase.DEBRIEF, 25);
 
         popolaBriefing(f1);
+        popolaDatiLivello1(f2);
 
         creaModuloLivello1(f2);
         creaModuloLivello2(f4);
@@ -81,6 +82,34 @@ public class GameStructureSeeder implements CommandLineRunner {
               {"label": "Ore di test al rilevamento", "valore": "1.840 h (su 5.000 h richieste dal capitolato)"}
             ]
             """);
+
+        faseRepository.save(fase);
+    }
+
+    private void popolaDatiLivello1(Fase fase) {
+        fase.setContenutoTesto(
+                "Il laboratorio di NORDAUTO ha inviato le seguenti informazioni preliminari sul guasto rilevato. " +
+                        "Analizzatele e identificate la causa principale.\n\n" +
+                        "OSSERVAZIONI VISIVE\n" +
+                        "- Cricca a partenza superficiale nella zona di raccordo (raggio R3) tra tratto Ø45 e Ø32 mm\n" +
+                        "- Propagazione della cricca a ~45° rispetto all'asse (classico da torsione o fatica combinata)\n" +
+                        "- Nessuna deformazione plastica macroscopica visibile\n" +
+                        "- Superficie di frattura con aspetto 'a conchiglia' (beachmarks visibili)\n\n" +
+                        "DATI DI PROCESSO (dall'ufficio tecnico di PEOPLE DESIGN FACTORY)\n" +
+                        "- Il raggio di raccordo progettuale era R5, ma le ultime due commesse sono state prodotte con R3 per un errore nel file CNC non rilevato in fase di controllo\n" +
+                        "- Il trattamento di tempra ad induzione è stato eseguito correttamente (durezza verificata: 58-62 HRC)\n" +
+                        "- Il materiale è 42CrMo4 bonificato: Rm = 1000 MPa, Re = 850 MPa (valori nella norma)\n" +
+                        "- Il test endurance ha applicato il 100% del carico ciclico da specifica (650 Nm, R=-1, freq. 30 Hz)"
+        );
+
+        fase.setDatiJson("""
+        [
+          {"label": "Kt raccordo R5", "valore": "≈ 1.45"},
+          {"label": "Kt raccordo R3", "valore": "≈ 2.10"},
+          {"label": "Tensione alternata con Kt R5", "valore": "~310 MPa (sotto il limite a fatica ~400 MPa)"},
+          {"label": "Tensione alternata con Kt R3", "valore": "~450 MPa (SOPRA il limite a fatica)"}
+        ]
+        """);
 
         faseRepository.save(fase);
     }

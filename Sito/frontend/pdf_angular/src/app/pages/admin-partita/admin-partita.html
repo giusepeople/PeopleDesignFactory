@@ -82,7 +82,7 @@
       </section>
 
       @if (f.fase?.tipo === 'LIVELLO') {
-        <app-modulo-revisione [partitaId]="partitaId" />
+      <app-modulo-revisione [partitaId]="partitaId" [gruppiDettaglio]="p.gruppi" />
       }
     }
 

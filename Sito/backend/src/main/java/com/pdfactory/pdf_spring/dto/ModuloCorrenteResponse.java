@@ -7,9 +7,11 @@ import java.util.UUID;
 public record ModuloCorrenteResponse(
         UUID moduloId,
         String titolo,
+        String contenutoTesto,
+        List<DatoBriefingDTO> dati,
         List<DomandaModuloDTO> domande,
         List<RispostaEsistenteDTO> risposteAttuali,
-        String invioStato,       // BOZZA | INVIATO | APPROVATO | RIFIUTATO
+        String invioStato,
         String motivoRifiuto,
         Integer minutiExtra,
         boolean sonoIoPM,

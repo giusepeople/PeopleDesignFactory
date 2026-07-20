@@ -9,187 +9,184 @@
   <main class="stage">
     @if (state(); as s) {
 
-      @if (s.status === 'IN_ATTESA') {
-        <section class="waiting-card corner-frame">
-          <app-mascot [size]="88" />
-          <p class="eyebrow">Codice partita</p>
-          <p class="codice">{{ s.codice }}</p>
-          <p class="status-text">In attesa che il Game Master avvii la partita...</p>
-          <span class="chip chip--blue">{{ s.totaleGiocatori }} giocatori in lobby</span>
+    @if (s.status === 'IN_ATTESA') {
+    <section class="waiting-card corner-frame">
+      <app-mascot [size]="88" />
+      <p class="eyebrow">Codice partita</p>
+      <p class="codice">{{ s.codice }}</p>
+      <p class="status-text">In attesa che il Game Master avvii la partita...</p>
+      <span class="chip chip--blue">{{ s.totaleGiocatori }} giocatori in lobby</span>
 
-          @if (s.giocatori.length > 0) {
-            <div class="player-tags">
-              @for (g of s.giocatori; track g.id) {
-                <span class="player-tag">{{ g.nickname }}</span>
-              }
-            </div>
-          }
-        </section>
-      }
-
-      @if (s.status === 'IN_CORSO') {
-        @if (me; as mePlayer) {
-
-          @if (faseCorrente(); as f) {
-            @if (f.fase?.tipo === 'BRIEFING') {
-              <div class="briefing-page">
-                <div class="briefing-topbar surface-card">
-                  <div>
-                    <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
-                    <p class="fase-nome-top">{{ f.fase?.nome }}</p>
-                  </div>
-                  <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
-                </div>
-
-                <section class="briefing-card corner-frame">
-                  <p class="eyebrow">Il contesto</p>
-                  <h2 class="section-title">Cosa è successo</h2>
-                  @for (p of paragrafi(f.contenutoTesto); track $index) {
-                    <p class="section-text">{{ p }}</p>
-                  }
-                  @if (f.dati.length > 0) {
-                    <h3 class="subsection-title">Componente difettosa</h3>
-                    <div class="data-grid">
-                      @for (d of f.dati; track d.label) {
-                        <div class="data-item">
-                          <p class="data-item-label">{{ d.label }}</p>
-                          <p class="data-item-value">{{ d.valore }}</p>
-                        </div>
-                      }
-                    </div>
-                  }
-                </section>
-
-                <section class="briefing-card">
-                  <p class="eyebrow">Schede ruolo</p>
-                  <h2 class="section-title">Chi fa cosa nel team</h2>
-
-                  <div class="mio-ruolo-banner">
-                    <app-mascot [size]="44" />
-                    <p>Il tuo ruolo: <strong>{{ mePlayer.ruoloNome }}</strong> — Gruppo {{ mePlayer.gruppoNum }}</p>
-                  </div>
-
-                  <div class="ruoli-grid">
-                    @for (ruolo of ruoli(); track ruolo.id) {
-                      <div class="ruolo-card" [class.ruolo-mio]="mePlayer.ruoloCodice === ruolo.codice">
-                        <div class="ruolo-header">
-                          {{ ruolo.nome }}
-                          @if (mePlayer.ruoloCodice === ruolo.codice) { <span class="tag-tu">TU</span> }
-                        </div>
-
-                        <p class="ruolo-sezione-title">Missione</p>
-                        <p class="section-text">{{ ruolo.missione }}</p>
-
-                        <p class="ruolo-sezione-title">Competenze</p>
-                        <ul class="ruolo-list">
-                          @for (riga of bulletList(ruolo.competenze); track riga) { <li>{{ riga }}</li> }
-                        </ul>
-
-                        <p class="ruolo-sezione-title">Superpoteri</p>
-                        <ul class="ruolo-list ruolo-list--superpoteri">
-                          @for (riga of bulletList(ruolo.superpoteri); track riga) { <li>{{ riga }}</li> }
-                        </ul>
-
-                        <p class="ruolo-sezione-title">Punti critici</p>
-                        <ul class="ruolo-list ruolo-list--critici">
-                          @for (riga of bulletList(ruolo.puntiCritici); track riga) { <li>{{ riga }}</li> }
-                        </ul>
-                      </div>
-                    }
-                  </div>
-                </section>
-
-                <section class="briefing-card pronto-card">
-                  @if (sonoPM) {
-                    @if (mioGruppoStato === 'PRONTO') {
-                      <p class="pronto-ok">✓ Gruppo confermato pronto. In attesa degli altri...</p>
-                    } @else {
-                      <button type="button" class="btn-primary" (click)="segnalaPronto()" [disabled]="inviandoPronto()">
-                        @if (inviandoPronto()) { Invio... } @else { Il mio gruppo è pronto → }
-                      </button>
-                    }
-                  } @else {
-                    <p class="pronto-wait">
-                      Solo il Project Manager può segnalare che siete pronti.
-                      @if (mioGruppoStato === 'PRONTO') { Il tuo gruppo ha già confermato. }
-                    </p>
-                  }
-                  <p class="pronto-count">{{ gruppiPronti }} / {{ totaleGruppi }} gruppi pronti</p>
-                </section>
-              </div>
-            } @else if (f.fase?.tipo === 'LIVELLO') {
-              <div class="briefing-page">
-                <div class="briefing-topbar surface-card">
-                  <div>
-                    <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
-                    <p class="fase-nome-top">{{ f.fase?.nome }}</p>
-                  </div>
-                  <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
-                </div>
-
-                <section class="fase-card corner-frame">
-                  <div class="my-role-card">
-                    <p class="label">Sei nel</p>
-                    <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
-                    <p class="label">Il tuo ruolo</p>
-                    <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
-                  </div>
-                </section>
-
-                @if (session(); as sess) {
-                  <app-modulo-form
-                    [partitaId]="partitaId"
-                    [giocatoreId]="sess.giocatoreId"
-                    [sessionToken]="sess.sessionToken"
-                  />
-                }
-              </div>
-            } @else {
-              <section class="fase-card corner-frame">
-                <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
-                <h2 class="section-title">{{ f.fase?.nome }}</h2>
-                <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" size="lg" />
-
-                <div class="my-role-card">
-                  <p class="label">Sei nel</p>
-                  <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
-                  <p class="label">Il tuo ruolo</p>
-                  <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
-                </div>
-              </section>
-            }
-          }
-
-          @if (compagniDiGruppo.length > 0) {
-            <section class="surface-card compact">
-              <p class="eyebrow">Compagni di squadra</p>
-              <div class="player-tags">
-                @for (c of compagniDiGruppo; track c.id) {
-                  <span class="player-tag">{{ c.nickname }} · {{ c.ruoloNome }}</span>
-                }
-              </div>
-            </section>
-          }
-
-        } @else {
-          <section class="waiting-card corner-frame">
-            <app-mascot [size]="88" />
-            <p class="status-text">La partita è iniziata senza di te.</p>
-          </section>
+      @if (s.giocatori.length > 0) {
+      <div class="player-tags">
+        @for (g of s.giocatori; track g.id) {
+        <span class="player-tag">{{ g.nickname }}</span>
         }
+      </div>
       }
+    </section>
+    }
 
-      @if (s.status === 'TERMINATA') {
-        <section class="waiting-card corner-frame">
-          <app-mascot [size]="88" [variant]="'ready'" />
-          <p class="status-text">Questa partita è terminata.</p>
-        </section>
+    @if (s.status === 'IN_CORSO') {
+    @if (me; as mePlayer) {
+
+    @if (faseCorrente(); as f) {
+    @if (f.fase?.tipo === 'BRIEFING') {
+    <div class="briefing-page">
+      <div class="briefing-topbar surface-card">
+        <div>
+          <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+          <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+        </div>
+        <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
+      </div>
+
+      <section class="briefing-card corner-frame">
+        <p class="eyebrow">Il contesto</p>
+        <h2 class="section-title">Cosa è successo</h2>
+        @for (p of paragrafi(f.contenutoTesto); track $index) {
+        <p class="section-text">{{ p }}</p>
+        }
+        @if (f.dati.length > 0) {
+        <h3 class="subsection-title">Componente difettosa</h3>
+        <div class="data-grid">
+          @for (d of f.dati; track d.label) {
+          <div class="data-item">
+            <p class="data-item-label">{{ d.label }}</p>
+            <p class="data-item-value">{{ d.valore }}</p>
+          </div>
+          }
+        </div>
+        }
+      </section>
+
+      <section class="briefing-card">
+        <p class="eyebrow">Schede ruolo</p>
+        <h2 class="section-title">Chi fa cosa nel team</h2>
+
+        <div class="mio-ruolo-banner">
+          <app-mascot [size]="44" />
+          <p>Il tuo ruolo: <strong>{{ mePlayer.ruoloNome }}</strong> — Gruppo {{ mePlayer.gruppoNum }}</p>
+        </div>
+
+        <div class="ruoli-grid">
+          @for (ruolo of ruoli(); track ruolo.id) {
+          <div class="ruolo-card" [class.ruolo-mio]="mePlayer.ruoloCodice === ruolo.codice">
+            <div class="ruolo-header">
+              {{ ruolo.nome }}
+              @if (mePlayer.ruoloCodice === ruolo.codice) { <span class="tag-tu">TU</span> }
+            </div>
+
+            <p class="ruolo-sezione-title">Missione</p>
+            <p class="section-text">{{ ruolo.missione }}</p>
+
+            <p class="ruolo-sezione-title">Competenze</p>
+            <ul class="ruolo-list">
+              @for (riga of bulletList(ruolo.competenze); track riga) { <li>{{ riga }}</li> }
+            </ul>
+
+            <p class="ruolo-sezione-title">Superpoteri</p>
+            <ul class="ruolo-list ruolo-list--superpoteri">
+              @for (riga of bulletList(ruolo.superpoteri); track riga) { <li>{{ riga }}</li> }
+            </ul>
+
+            <p class="ruolo-sezione-title">Punti critici</p>
+            <ul class="ruolo-list ruolo-list--critici">
+              @for (riga of bulletList(ruolo.puntiCritici); track riga) { <li>{{ riga }}</li> }
+            </ul>
+          </div>
+          }
+        </div>
+      </section>
+
+      <section class="briefing-card pronto-card">
+        @if (sonoPM) {
+        @if (mioGruppoStato === 'PRONTO') {
+        <p class="pronto-ok">✓ Gruppo confermato pronto. In attesa degli altri...</p>
+        } @else {
+        <button type="button" class="btn-primary" (click)="segnalaPronto()" [disabled]="inviandoPronto()">
+          @if (inviandoPronto()) { Invio... } @else { Il mio gruppo è pronto → }
+        </button>
+        }
+        } @else {
+        <p class="pronto-wait">
+          Solo il Project Manager può segnalare che siete pronti.
+          @if (mioGruppoStato === 'PRONTO') { Il tuo gruppo ha già confermato. }
+        </p>
+        }
+        <p class="pronto-count">{{ gruppiPronti }} / {{ totaleGruppi }} gruppi pronti</p>
+      </section>
+    </div>
+    } @else if (f.fase?.tipo === 'LIVELLO') {
+    <div class="briefing-page">
+      <div class="briefing-topbar surface-card">
+        <div>
+          <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+          <p class="fase-nome-top">{{ f.fase?.nome }}</p>
+        </div>
+        <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" />
+      </div>
+
+      <section class="fase-card corner-frame">
+        <div class="my-role-card">
+          <p class="label">Sei nel</p>
+          <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+          <p class="label">Il tuo ruolo</p>
+          <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+        </div>
+      </section>
+
+      @if (session(); as sess) {
+      <app-modulo-form [partitaId]="partitaId" [giocatoreId]="sess.giocatoreId" [sessionToken]="sess.sessionToken"
+        (minutiExtraChange)="onMinutiExtra($event)" />
       }
+    </div>
+    } @else {
+    <section class="fase-card corner-frame">
+      <p class="eyebrow">Fase {{ f.fase?.ordinal }} di 7</p>
+      <h2 class="section-title">{{ f.fase?.nome }}</h2>
+      <app-gauge [percent]="percentTrascorso" [label]="tempoFormattato" size="lg" />
+
+      <div class="my-role-card">
+        <p class="label">Sei nel</p>
+        <p class="gruppo-num">Gruppo {{ mePlayer.gruppoNum }}</p>
+        <p class="label">Il tuo ruolo</p>
+        <p class="ruolo-nome">{{ mePlayer.ruoloNome }}</p>
+      </div>
+    </section>
+    }
+    }
+
+    @if (compagniDiGruppo.length > 0) {
+    <section class="surface-card compact">
+      <p class="eyebrow">Compagni di squadra</p>
+      <div class="player-tags">
+        @for (c of compagniDiGruppo; track c.id) {
+        <span class="player-tag">{{ c.nickname }} · {{ c.ruoloNome }}</span>
+        }
+      </div>
+    </section>
+    }
+
+    } @else {
+    <section class="waiting-card corner-frame">
+      <app-mascot [size]="88" />
+      <p class="status-text">La partita è iniziata senza di te.</p>
+    </section>
+    }
+    }
+
+    @if (s.status === 'TERMINATA') {
+    <section class="waiting-card corner-frame">
+      <app-mascot [size]="88" [variant]="'ready'" />
+      <p class="status-text">Questa partita è terminata.</p>
+    </section>
+    }
 
     }
 
     @if (errorMsg()) {
-      <p class="field-error">{{ errorMsg() }}</p>
+    <p class="field-error">{{ errorMsg() }}</p>
     }
   </main>
 </div>
