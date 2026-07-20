@@ -2,6 +2,7 @@ package com.pdfactory.pdf_spring.controller;
 
 import com.pdfactory.pdf_spring.dto.*;
 import com.pdfactory.pdf_spring.enums.StatoGioco;
+import com.pdfactory.pdf_spring.enums.TipoFase;
 import com.pdfactory.pdf_spring.model.*;
 import com.pdfactory.pdf_spring.repository.*;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,7 @@ import com.pdfactory.pdf_spring.enums.StatoTeam;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/games")
@@ -300,6 +298,44 @@ public class GameController {
         }
     }
 
+    /**
+     * Turbativa 1 - "Il cambio di scuderia": ogni Project Manager si sposta al
+     * tavolo successivo in senso orario (l'ultimo gruppo passa il PM al primo).
+     * Il ruolo PM resta invariato: cambia solo il gruppo di appartenenza del giocatore.
+     */
+    private void ruotaProjectManager(Partita partita) {
+        List<Gruppo> gruppi = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(partita.getId());
+        if (gruppi.size() < 2) {
+            return; // con un solo gruppo non c'è nessuno scambio da fare
+        }
+
+        List<Giocatore> tutti = giocatoreRepository.findByPartitaId(partita.getId());
+
+        // snapshot del PM attuale di ogni gruppo, PRIMA di spostare chiunque
+        Map<UUID, Giocatore> pmAttualeDelGruppo = new HashMap<>();
+        for (Gruppo g : gruppi) {
+            Giocatore pm = tutti.stream()
+                    .filter(gi -> gi.getGruppo() != null && gi.getGruppo().getId().equals(g.getId()))
+                    .filter(gi -> gi.getRuolo() != null && "PM".equals(gi.getRuolo().getCodice()))
+                    .findFirst()
+                    .orElse(null);
+            pmAttualeDelGruppo.put(g.getId(), pm);
+        }
+
+        // ogni PM si sposta al tavolo successivo (senso orario); l'ultimo va al primo
+        for (int i = 0; i < gruppi.size(); i++) {
+            Giocatore pm = pmAttualeDelGruppo.get(gruppi.get(i).getId());
+            if (pm == null) continue; // difensivo: a partita avviata non dovrebbe succedere
+            Gruppo prossimoTavolo = gruppi.get((i + 1) % gruppi.size());
+            pm.setGruppo(prossimoTavolo);
+        }
+
+        List<Giocatore> pmDaSalvare = pmAttualeDelGruppo.values().stream()
+                .filter(Objects::nonNull)
+                .toList();
+        giocatoreRepository.saveAll(pmDaSalvare);
+    }
+
     private PannelloControlloResponse buildPannello(Partita partita) {
         List<Giocatore> tutti = giocatoreRepository.findByPartitaId(partita.getId());
         List<Gruppo> gruppi = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(partita.getId());
@@ -396,6 +432,11 @@ public class GameController {
         } else {
             partita.setFaseAttuale(prossima);
             partita.setFaseIniziataIl(Instant.now());
+
+            // se la nuova fase è la Turbativa, tutti i PM cambiano tavolo prima che parta il countdown
+            if (prossima.getTipo() == TipoFase.TURBATIVA) {
+                ruotaProjectManager(partita);
+            }
         }
 
         partitaRepository.save(partita);
