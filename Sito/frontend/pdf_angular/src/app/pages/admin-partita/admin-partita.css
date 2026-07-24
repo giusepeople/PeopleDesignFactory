@@ -95,3 +95,14 @@
   .pronti-row { flex-direction: column; align-items: stretch; }
   .pronti-row button { width: 100%; }
 }
+.opzioni-preview { margin-top: 16px; }
+.complicazione-row { margin-top: 16px; }
+.subsection-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+  margin: 0 0 10px;
+}
+

@@ -432,8 +432,8 @@ public class GameController {
         } else {
             partita.setFaseAttuale(prossima);
             partita.setFaseIniziataIl(Instant.now());
+            partita.setComplicazioneAttivata(false); // <-- nuovo: reset ad ogni cambio fase
 
-            // se la nuova fase è la Turbativa, tutti i PM cambiano tavolo prima che parta il countdown
             if (prossima.getTipo() == TipoFase.TURBATIVA) {
                 ruotaProjectManager(partita);
             }
@@ -449,6 +449,32 @@ public class GameController {
         return ResponseEntity.ok(buildPannello(partita));
     }
 
+    // ---------- GM: attivazione manuale della complicazione (Livello 2 e futuri livelli simili) ----------
+
+    @PostMapping("/{id}/attiva-complicazione")
+    public ResponseEntity<?> attivaComplicazione(@PathVariable UUID id, Authentication authentication) {
+        Partita partita = partitaRepository.findById(id).orElse(null);
+        if (partita == null) {
+            return ResponseEntity.status(404).body("Partita non trovata");
+        }
+        if (!partita.getGameMaster().getNome().equals(authentication.getName())) {
+            return ResponseEntity.status(403).body("Non sei il Game Master di questa partita");
+        }
+        if (partita.getStatus() != StatoGioco.IN_CORSO) {
+            return ResponseEntity.status(409).body("La partita non è in corso");
+        }
+
+        Fase fase = partita.getFaseAttuale();
+        if (fase == null || fase.getComplicazioneTesto() == null || fase.getComplicazioneTesto().isBlank()) {
+            return ResponseEntity.status(400).body("Questa fase non prevede complicazioni");
+        }
+
+        partita.setComplicazioneAttivata(true);
+        partitaRepository.save(partita);
+
+        return ResponseEntity.ok(buildPannello(partita));
+    }
+
     private FaseCorrenteResponse buildFaseCorrenteResponse(Partita partita) {
         Fase fase = partita.getFaseAttuale();
 
@@ -456,6 +482,10 @@ public class GameController {
         Long secondiRimanenti = null;
         String contenuto = null;
         List<DatoBriefingDTO> dati = List.of();
+        List<OpzioneLivelloDTO> opzioni = List.of();
+        boolean haComplicazione = false;
+        boolean complicazioneVisibile = false;
+        String complicazioneTesto = null;
 
         Instant adesso = Instant.now();
 
@@ -464,9 +494,17 @@ public class GameController {
                     fase.getTipo().name(), fase.getDefaultDurataMinuti());
             contenuto = fase.getContenutoTesto();
             dati = parseDati(fase.getDatiJson());
+            opzioni = parseOpzioniLivello(fase.getOpzioniJson());
+
+            haComplicazione = fase.getComplicazioneTesto() != null && !fase.getComplicazioneTesto().isBlank();
+            complicazioneVisibile = isComplicazioneVisibile(partita, fase);
+            complicazioneTesto = complicazioneVisibile ? fase.getComplicazioneTesto() : null;
+
+            int minutiExtraComplicazione = complicazioneVisibile && fase.getComplicazioneMinutiExtra() != null
+                    ? fase.getComplicazioneMinutiExtra() : 0;
 
             if (partita.getFaseIniziataIl() != null) {
-                long durataSec = fase.getDefaultDurataMinuti() * 60L;
+                long durataSec = (fase.getDefaultDurataMinuti() + minutiExtraComplicazione) * 60L;
                 long trascorsi = adesso.getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
                 secondiRimanenti = Math.max(0, durataSec - trascorsi);
             }
@@ -474,6 +512,7 @@ public class GameController {
 
         return new FaseCorrenteResponse(
                 partita.getStatus().name(), faseDto, partita.getFaseIniziataIl(), secondiRimanenti, contenuto, dati,
+                opzioni, haComplicazione, complicazioneVisibile, complicazioneTesto,
                 adesso
         );
     }
@@ -487,5 +526,28 @@ public class GameController {
         } catch (Exception e) {
             return List.of();
         }
+    }
+
+    private List<OpzioneLivelloDTO> parseOpzioniLivello(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<OpzioneLivelloDTO>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    private boolean isComplicazioneVisibile(Partita partita, Fase fase) {
+        if (fase.getComplicazioneTesto() == null || fase.getComplicazioneTesto().isBlank()) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(partita.getComplicazioneAttivata())) {
+            return true;
+        }
+        if (fase.getComplicazioneDopoMinuti() == null || partita.getFaseIniziataIl() == null) {
+            return false;
+        }
+        long trascorsiMin = (Instant.now().getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond()) / 60;
+        return trascorsiMin >= fase.getComplicazioneDopoMinuti();
     }
 }

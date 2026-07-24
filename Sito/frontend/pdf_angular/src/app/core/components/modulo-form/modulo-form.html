@@ -3,7 +3,7 @@
     <p class="loading-text">Caricamento del foglio risposta...</p>
   } @else if (modulo(); as m) {
 
-    @if (m.contenutoTesto || m.dati.length > 0) {
+    @if (m.contenutoTesto || m.dati.length > 0 || m.opzioni.length > 0) {
       <div class="dati-diagnostica">
         <p class="eyebrow">Dati disponibili</p>
         @for (p of paragrafi(m.contenutoTesto); track $index) {
@@ -19,11 +19,37 @@
             }
           </div>
         }
+
+        @if (m.opzioni.length > 0) {
+          <p class="subsection-title">Le opzioni sul tavolo</p>
+          <div class="opzioni-grid">
+            @for (o of m.opzioni; track o.valore) {
+              <div class="opzione-card corner-frame">
+                <p class="opzione-header"><span class="opzione-badge">{{ o.valore }}</span> {{ o.titolo }}</p>
+                <p class="section-text">{{ o.descrizione }}</p>
+                <div class="opzione-meta">
+                  <span class="chip chip--blue">Costo: {{ o.costoStimato }}</span>
+                  <span class="chip chip--blue">Tempo: {{ o.tempo }}</span>
+                </div>
+                <p class="opzione-rischio">⚠ {{ o.rischio }}</p>
+              </div>
+            }
+          </div>
+        }
       </div>
     }
 
     <p class="eyebrow">Foglio risposta</p>
     <h2 class="section-title">{{ m.titolo }}</h2>
+
+    @if (m.complicazioneTesto) {
+      <div class="banner banner--complicazione">
+        <p class="banner-title">⚡ Complicazione inattesa</p>
+        @for (p of paragrafi(m.complicazioneTesto); track $index) {
+          <p class="banner-text">{{ p }}</p>
+        }
+      </div>
+    }
 
     @if (m.invioStato === 'RIFIUTATO') {
       <div class="banner banner--rifiutato">

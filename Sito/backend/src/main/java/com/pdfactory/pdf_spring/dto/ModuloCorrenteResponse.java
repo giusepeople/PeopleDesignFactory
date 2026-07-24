@@ -9,6 +9,8 @@ public record ModuloCorrenteResponse(
         String titolo,
         String contenutoTesto,
         List<DatoBriefingDTO> dati,
+        List<OpzioneLivelloDTO> opzioni,
+        String complicazioneTesto,
         List<DomandaModuloDTO> domande,
         List<RispostaEsistenteDTO> risposteAttuali,
         String invioStato,

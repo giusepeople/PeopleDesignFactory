@@ -45,6 +45,7 @@ public class GameStructureSeeder implements CommandLineRunner {
         popolaBriefing(f1);
         popolaDatiLivello1(f2);
         popolaTurbativa1(f3);
+        popolaLivello2(f4);
 
         creaModuloLivello1(f2);
         creaModuloLivello2(f4);
@@ -115,6 +116,64 @@ public class GameStructureSeeder implements CommandLineRunner {
         faseRepository.save(fase);
     }
 
+    private void popolaLivello2(Fase fase) {
+        fase.setContenutoTesto(
+                "La causa del guasto è confermata (raggio errato R3 invece di R5). Ora dovete decidere come " +
+                        "intervenire. Il cliente NORDAUTO vuole sapere entro 24 ore quale strada avete scelto e " +
+                        "perché. Avete a disposizione le seguenti risorse:"
+        );
+
+        fase.setDatiJson("""
+            [
+              {"label": "Budget emergenza", "valore": "Approvato dal CFO: max 45.000€"},
+              {"label": "Progettisti disponibili", "valore": "2 Senior (di cui 1 già impegnato su altro progetto al 50%), 1 Junior"},
+              {"label": "Reparto produzione", "valore": "Disponibile da domani mattina — capacità: max 3 pezzi/giorno con lavorazioni urgenti"},
+              {"label": "Materiale", "valore": "Barra 42CrMo4 in magazzino sufficiente per 8 pezzi; se serve materiale diverso, lead time fornitore: 5 giorni lavorativi"},
+              {"label": "Test endurance", "valore": "Disponibilità banco prova da dopodomani, max 300 ore di test nel periodo disponibile"}
+            ]
+            """);
+
+        fase.setOpzioniJson("""
+            [
+              {
+                "valore": "A",
+                "titolo": "Modifica rapida",
+                "descrizione": "Correggere il file CNC (R3→R5), rilavorare i 6 pezzi prototipo esistenti con rettifica di precisione, ripetere test sui 6 pezzi modificati.",
+                "costoStimato": "~18.000€ (lavorazioni urgenti + test)",
+                "tempo": "12 gg lavorativi",
+                "rischio": "MEDIO: la rilavorazione potrebbe introdurre tensioni residue non volute. Serve controllo 100%."
+              },
+              {
+                "valore": "B",
+                "titolo": "Riprogettazione parziale",
+                "descrizione": "Ridisegnare il tratto critico aumentando il raggio a R6 (margine extra) e aggiungendo un trattamento di pallinatura sulla zona di raccordo per migliorare la resistenza a fatica. Produrre 4 pezzi nuovi.",
+                "costoStimato": "~35.000€ (nuovi pezzi + pallinatura + test)",
+                "tempo": "18 gg lavorativi",
+                "rischio": "BASSO tecnicamente, ma alto sui tempi: supera di 12 gg la finestra di test disponibile."
+              },
+              {
+                "valore": "C",
+                "titolo": "Fix + Redesign parallelo",
+                "descrizione": "Implementare subito l'Opzione A per rispettare la deadline del cliente, avviando in parallelo la riprogettazione dell'Opzione B per la versione di produzione definitiva.",
+                "costoStimato": "~48.000€ totali (A+B in parallelo)",
+                "tempo": "A: 12 gg / B: 18 gg in parallelo",
+                "rischio": "ALTO gestionale: richiede di gestire due percorsi paralleli con risorse limitate. Possibile overload del team."
+              }
+            ]
+            """);
+
+        fase.setComplicazioneTesto(
+                "Il responsabile del reparto produzione chiama: il tornitore principale è in malattia e non " +
+                        "rientra prima di 4 giorni. La capacità produttiva scende a max 1 pezzo/giorno.\n\n" +
+                        "Il team ha 5 minuti per riconsiderare la propria scelta alla luce di questa " +
+                        "informazione. Può cambiare opzione o modificare il piano dell'opzione scelta."
+        );
+        fase.setComplicazioneDopoMinuti(8);
+        fase.setComplicazioneMinutiExtra(5);
+
+        faseRepository.save(fase);
+    }
+
     private void popolaTurbativa1(Fase fase) {
         fase.setContenutoTesto(
                 "\"ATTENZIONE PEOPLE DESIGN FACTORY. Il Direttore Moretti ha appena chiamato dall'aeroporto. " +
@@ -181,18 +240,40 @@ public class GameStructureSeeder implements CommandLineRunner {
     private void creaModuloLivello2(Fase fase) {
         Modulo modulo = new Modulo();
         modulo.setFase(fase);
-        modulo.setTitolo("Decisione gestionale - Modulo gruppo");
+        modulo.setTitolo("Decisione gestionale - Foglio Risposta L2");
+
+        Ruolo manufacturing = ruoloRepository.findByCodice("MANUFACTURING").orElse(null);
+
+        String opzioniD1 = """
+            [
+              {"valore": "A", "etichetta": "Modifica rapida"},
+              {"valore": "B", "etichetta": "Riprogettazione parziale"},
+              {"valore": "C", "etichetta": "Fix + Redesign parallelo"}
+            ]
+            """;
 
         aggiungiDomanda(modulo, 1, TipoDomanda.SCELTA_MULTIPLA,
-                "Quale delle 3 opzioni disponibili scegliete come piano d'azione principale?", null);
+                "Quale opzione ha scelto il team come piano d'azione principale?",
+                null, opzioniD1, null, null);
+
         aggiungiDomanda(modulo, 2, TipoDomanda.APERTA,
-                "Motivate la scelta in termini di costi/tempi/qualità.", null);
+                "Motivazione della scelta in massimo 5 righe (includere: costo, tempo, rischio tecnico, risorse).",
+                null);
+
         aggiungiDomanda(modulo, 3, TipoDomanda.APERTA,
-                "Come cambia la scelta alla luce della complicazione emersa dopo 8 minuti?", null);
+                "Come avete modificato il piano dopo la complicazione del tornitore? (Opzione A/C: avete " +
+                        "considerato un fornitore esterno? Opzione B: avete rivisto i tempi?)",
+                null);
+
         aggiungiDomanda(modulo, 4, TipoDomanda.APERTA,
-                "Quali rischi residui accettate consapevolmente?", null);
+                "Chi nel team si è opposto alla scelta finale e perché? Indicate se la decisione è stata " +
+                        "unanime o se c'è stato disaccordo: rispondere con onestà gestionale.",
+                null);
+
         aggiungiDomanda(modulo, 5, TipoDomanda.APERTA,
-                "Quali risorse aggiuntive richiedete, se ce ne sono?", null);
+                "[MANUFACTURING ENGINEER] Con la riduzione della capacità produttiva a 1 pezzo/giorno, di " +
+                        "quanti giorni cambiano i tempi dell'opzione scelta? Fornite una stima aggiornata.",
+                null, null, null, manufacturing);
 
         moduloRepository.save(modulo);
     }

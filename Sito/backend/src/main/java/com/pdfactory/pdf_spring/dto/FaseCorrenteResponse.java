@@ -10,5 +10,9 @@ public record FaseCorrenteResponse(
         Long secondiRimanenti,
         String contenutoTesto,
         List<DatoBriefingDTO> dati,
+        List<OpzioneLivelloDTO> opzioni,
+        boolean haComplicazione,
+        boolean complicazioneVisibile,
+        String complicazioneTesto,
         Instant serverTimestamp
 ) {}

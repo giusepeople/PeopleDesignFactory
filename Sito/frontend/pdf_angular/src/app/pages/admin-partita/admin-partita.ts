@@ -59,6 +59,24 @@ export class AdminPartita implements OnInit, OnDestroy {
     }
   }
 
+  attivandoComplicazione = signal(false);
+
+  attivaComplicazione() {
+    this.attivandoComplicazione.set(true);
+    this.errorMsg.set('');
+
+    this.gameService.attivaComplicazione(this.partitaId).subscribe({
+      next: () => {
+        this.attivandoComplicazione.set(false);
+        this.refresh();
+      },
+      error: (err) => {
+        this.attivandoComplicazione.set(false);
+        this.errorMsg.set(err.error ?? 'Impossibile attivare la complicazione.');
+      },
+    });
+  }
+
   private tick() {
     this.secondiVisualizzati.set(this.countdown.secondiRimanenti());
   }

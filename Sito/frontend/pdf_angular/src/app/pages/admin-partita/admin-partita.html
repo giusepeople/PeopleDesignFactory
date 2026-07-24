@@ -77,6 +77,36 @@
                 }
               </div>
             }
+
+            @if (f.opzioni.length > 0) {
+              <div class="opzioni-preview">
+                <p class="subsection-title">Le opzioni sul tavolo</p>
+                <div class="data-grid">
+                  @for (o of f.opzioni; track o.valore) {
+                    <div class="data-item">
+                      <p class="data-item-label">{{ o.valore }} — {{ o.titolo }}</p>
+                      <p class="data-item-value">{{ o.costoStimato }} · {{ o.tempo }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (f.haComplicazione) {
+              <div class="complicazione-row">
+                <p class="subsection-title">Complicazione inattesa</p>
+                @if (f.complicazioneVisibile) {
+                  <span class="chip chip--amber">⚡ Già attiva</span>
+                  @for (paragrafo of (f.complicazioneTesto ?? '').split('\n\n'); track $index) {
+                    <p class="section-text">{{ paragrafo }}</p>
+                  }
+                } @else {
+                  <button type="button" class="btn-secondary" (click)="attivaComplicazione()" [disabled]="attivandoComplicazione()">
+                    @if (attivandoComplicazione()) { Attivazione... } @else { ⚡ Attiva complicazione ora }
+                  </button>
+                }
+              </div>
+            }
           </div>
         }
       </section>

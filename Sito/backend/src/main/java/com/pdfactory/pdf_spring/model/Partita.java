@@ -51,6 +51,11 @@ public class Partita
     @Column(name = "fase_iniziata_il")
     private Instant faseIniziataIl;
 
+    // stato della complicazione della fase corrente, attivabile manualmente dal GM;
+    // viene resettato ad ogni cambio fase
+    @Column(name = "complicazione_attivata", nullable = false)
+    private Boolean complicazioneAttivata = false;
+
     @OneToMany(mappedBy = "partita", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Gruppo> gruppi = new ArrayList<>();
 

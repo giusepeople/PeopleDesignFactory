@@ -346,7 +346,6 @@ public class ModuloController {
                 : invio.getRisposte().stream()
                 .map(r -> {
                     boolean autorizzatoAModificare = puoModificareDomanda(giocatore, r.getDomanda());
-                    // il PM può SEMPRE visualizzare (sola lettura) le risposte di tutti i ruoli
                     boolean puoVisualizzare = autorizzatoAModificare || sonoPM;
                     boolean presente = r.getTestoRisposta() != null && !r.getTestoRisposta().isBlank();
 
@@ -365,7 +364,12 @@ public class ModuloController {
 
         String invioStato = invio == null ? "BOZZA" : invio.getStato().name();
         String motivoRifiuto = invio != null ? invio.getMotivoRifiuto() : null;
-        Integer minutiExtra = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+
+        int minutiExtraInvio = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+        boolean complicazioneVisibile = isComplicazioneVisibile(partita, fase);
+        int minutiExtraComplicazione = complicazioneVisibile && fase.getComplicazioneMinutiExtra() != null
+                ? fase.getComplicazioneMinutiExtra() : 0;
+        int minutiExtraTotale = minutiExtraInvio + minutiExtraComplicazione;
 
         boolean sonoIoPM = sonoPM;
         String mioRuoloCodice = giocatore.getRuolo() != null ? giocatore.getRuolo().getCodice() : null;
@@ -373,15 +377,17 @@ public class ModuloController {
         Long secondiRimanenti = null;
         Instant adesso = Instant.now();
         if (partita.getFaseIniziataIl() != null) {
-            long durataSec = (fase.getDefaultDurataMinuti() + minutiExtra) * 60L;
+            long durataSec = (fase.getDefaultDurataMinuti() + minutiExtraTotale) * 60L;
             long trascorsi = adesso.getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond();
             secondiRimanenti = Math.max(0, durataSec - trascorsi);
         }
 
         return new ModuloCorrenteResponse(
                 modulo.getId(), modulo.getTitolo(), fase.getContenutoTesto(), parseDati(fase.getDatiJson()),
+                parseOpzioniLivello(fase.getOpzioniJson()),
+                complicazioneVisibile ? fase.getComplicazioneTesto() : null,
                 domande, risposteAttuali,
-                invioStato, motivoRifiuto, minutiExtra, sonoIoPM, mioRuoloCodice,
+                invioStato, motivoRifiuto, minutiExtraTotale, sonoIoPM, mioRuoloCodice,
                 secondiRimanenti, adesso
         );
     }
@@ -403,7 +409,11 @@ public class ModuloController {
                 })
                 .toList();
 
-        Integer minutiExtra = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+        int minutiExtraInvio = invio != null && invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
+        boolean complicazioneVisibile = isComplicazioneVisibile(partita, fase);
+        int minutiExtraComplicazione = complicazioneVisibile && fase.getComplicazioneMinutiExtra() != null
+                ? fase.getComplicazioneMinutiExtra() : 0;
+        Integer minutiExtra = minutiExtraInvio + minutiExtraComplicazione;
 
         Long secondiRimanenti = null;
         if (partita.getFaseIniziataIl() != null) {
@@ -456,5 +466,32 @@ public class ModuloController {
         } catch (Exception e) {
             return List.of();
         }
+    }
+
+    private List<OpzioneLivelloDTO> parseOpzioniLivello(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<OpzioneLivelloDTO>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Una complicazione (se prevista dalla fase) diventa visibile automaticamente dopo
+     * complicazioneDopoMinuti dall'inizio fase, oppure se il GM l'ha attivata manualmente.
+     */
+    private boolean isComplicazioneVisibile(Partita partita, Fase fase) {
+        if (fase.getComplicazioneTesto() == null || fase.getComplicazioneTesto().isBlank()) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(partita.getComplicazioneAttivata())) {
+            return true;
+        }
+        if (fase.getComplicazioneDopoMinuti() == null || partita.getFaseIniziataIl() == null) {
+            return false;
+        }
+        long trascorsiMin = (Instant.now().getEpochSecond() - partita.getFaseIniziataIl().getEpochSecond()) / 60;
+        return trascorsiMin >= fase.getComplicazioneDopoMinuti();
     }
 }

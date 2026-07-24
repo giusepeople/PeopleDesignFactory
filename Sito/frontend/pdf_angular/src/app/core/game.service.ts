@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+
+
 export interface GameSummary {
   id: string;
   codice: string;
@@ -100,7 +102,20 @@ export interface FaseCorrenteResponse {
   secondiRimanenti: number | null;
   contenutoTesto: string | null;
   dati: DatoBriefing[];
+  opzioni: OpzioneLivello[];
+  haComplicazione: boolean;
+  complicazioneVisibile: boolean;
+  complicazioneTesto: string | null;
   serverTimestamp: string | null;
+}
+
+export interface OpzioneLivello {
+  valore: string;
+  titolo: string;
+  descrizione: string;
+  costoStimato: string;
+  tempo: string;
+  rischio: string;
 }
 
 export interface Ruolo {
@@ -152,6 +167,8 @@ export interface ModuloCorrenteResponse {
   titolo: string;
   contenutoTesto: string | null;
   dati: DatoBriefing[];
+  opzioni: OpzioneLivello[];
+  complicazioneTesto: string | null;
   domande: DomandaModulo[];
   risposteAttuali: RispostaEsistente[];
   invioStato: string;
@@ -162,6 +179,7 @@ export interface ModuloCorrenteResponse {
   secondiRimanenti: number | null;
   serverTimestamp: string | null;
 }
+
 export interface RispostaInput {
   domandaId: string;
   testoRisposta: string;
@@ -234,6 +252,10 @@ export class GameService {
 
   avanzaFase(partitaId: string): Observable<PannelloControllo> {
     return this.http.post<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/avanza-fase`, {});
+  }
+
+  attivaComplicazione(partitaId: string): Observable<PannelloControllo> {
+    return this.http.post<PannelloControllo>(`${this.apiUrl}/games/${partitaId}/attiva-complicazione`, {});
   }
 
   getRuoli(): Observable<Ruolo[]> {
