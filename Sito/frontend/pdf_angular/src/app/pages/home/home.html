@@ -1,28 +1,72 @@
-<div class="page">
-  <div class="grid-overlay" aria-hidden="true"></div>
+<div class="rl-page">
 
-  <header class="topbar">
-    <div class="wordmark-stamp">
-      <span class="stamp-eyebrow">People Design Factory</span>
-      <span class="stamp-title">RED LINE</span>
+  <!-- ================= sfondo animato ================= -->
+  <div class="rl-bg" aria-hidden="true">
+    <div class="rl-bg-grid"></div>
+    <div class="rl-blob rl-blob--a"></div>
+    <div class="rl-blob rl-blob--b"></div>
+    <div class="rl-blob rl-blob--c"></div>
+
+    <svg class="rl-gear rl-gear--a" viewBox="0 0 100 100" fill="none">
+      <path d="M50 8 L56 8 L58 20 L67 24 L77 17 L83 23 L76 33 L80 42 L92 44 L92 56 L80 58 L76 67 L83 77 L77 83 L67 76 L58 80 L56 92 L44 92 L42 80 L33 76 L23 83 L17 77 L24 67 L20 58 L8 56 L8 44 L20 42 L24 33 L17 23 L23 17 L33 24 L42 20 Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="16" stroke="currentColor" stroke-width="3"/>
+    </svg>
+    <svg class="rl-gear rl-gear--b" viewBox="0 0 100 100" fill="none">
+      <path d="M50 8 L56 8 L58 20 L67 24 L77 17 L83 23 L76 33 L80 42 L92 44 L92 56 L80 58 L76 67 L83 77 L77 83 L67 76 L58 80 L56 92 L44 92 L42 80 L33 76 L23 83 L17 77 L24 67 L20 58 L8 56 L8 44 L20 42 L24 33 L17 23 L23 17 L33 24 L42 20 Z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="50" cy="50" r="16" stroke="currentColor" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <!-- ================= topbar ================= -->
+  <header class="rl-topbar">
+    <div class="rl-brand">
+      <img src="/team-logo.png" alt="" class="rl-brand-badge" />
+      <div class="rl-brand-text">
+        <span class="rl-brand-eyebrow">People Design Factory</span>
+        <span class="rl-brand-name">RED LINE</span>
+      </div>
     </div>
-    <button type="button" class="btn-ghost" (click)="openAdminModal()">Area Game Master</button>
+
+    <button type="button" class="rl-admin-trigger" (click)="openAdminModal()">
+      <svg viewBox="0 0 24 24" fill="none" class="rl-icon">
+        <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Area Game Master</span>
+    </button>
   </header>
 
-  <main class="stage">
-    <section class="access-card corner-frame">
-      <app-mascot [size]="104" />
+  <!-- ================= hero ================= -->
+  <main class="rl-hero">
 
-      <p class="eyebrow">Accesso partecipanti</p>
-      <h1 class="stage-title">Entra nel tuo turno in officina</h1>
-      <p class="stage-subtitle">Inserisci il codice mostrato dal Game Master e il tuo nome per unirti al team.</p>
+    <section class="rl-hero-visual">
+      <span class="rl-hero-eyebrow">Simulazione per ingegneri meccanici</span>
+      <h1 class="rl-hero-title">Entra in officina,<br><span class="rl-hero-title-accent">salva il progetto.</span></h1>
+      <p class="rl-hero-sub">
+        Un cliente su tutte le furie, 48 ore sul groppone e un ufficio tecnico da coordinare.
+        Inserisci il PIN mostrato dal tuo Game Master e mettiti subito al lavoro con la tua squadra.
+      </p>
 
-      <div class="field-group">
-        <label class="field-label" for="pin">Codice partita</label>
+      <div class="rl-mascot-wrap">
+        <img src="/mascotte-pm.png" alt="Mascotte People Design Factory" class="rl-mascot" />
+        <div class="rl-mascot-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="rl-icon">
+            <path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Squadra pronta
+        </div>
+      </div>
+    </section>
+
+    <section class="rl-card" [class.rl-card--shake]="pinError()">
+      <span class="rl-card-eyebrow">Accesso partecipanti</span>
+
+      <div class="rl-field-group">
+        <label class="rl-field-label" for="pin">Pin della partita</label>
         <input
           id="pin"
-          class="field field--pin"
-          [class.field--error]="pinError()"
+          class="rl-field rl-field--pin"
+          [class.rl-field--error]="pinError()"
           type="text"
           inputmode="text"
           autocomplete="off"
@@ -32,65 +76,143 @@
           [value]="pin()"
           (input)="onPinInput($event)"
           (keydown.enter)="joinGame()"
-          aria-label="Codice partita"
+          aria-label="Pin della partita"
         />
       </div>
 
-      <div class="field-group">
-        <label class="field-label" for="nickname">Il tuo nome</label>
-        <input
-          id="nickname"
-          class="field"
-          type="text"
-          maxlength="30"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="Come vuoi farti chiamare"
-          [value]="nickname()"
-          (input)="onNicknameInput($event)"
-          (keydown.enter)="joinGame()"
-          aria-label="Il tuo nome"
-        />
+      <div class="rl-field-group">
+        <label class="rl-field-label" for="nickname">Il tuo nome</label>
+        <div class="rl-nickname-row">
+          <input
+            id="nickname"
+            class="rl-field"
+            [class.rl-field--error]="pinError()"
+            type="text"
+            maxlength="30"
+            autocomplete="off"
+            spellcheck="false"
+            [value]="nickname()"
+            (input)="onNicknameInput($event)"
+            (keydown.enter)="joinGame()"
+            aria-label="Il tuo nome"
+          />
+          <button type="button" class="rl-dice-btn" (click)="rigeneraNickname()" title="Genera un altro nome" aria-label="Genera un altro nickname">
+            <svg viewBox="0 0 24 24" fill="none" class="rl-icon">
+              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="2"/>
+              <circle cx="8.5" cy="8.5" r="1.6" fill="currentColor"/>
+              <circle cx="15.5" cy="8.5" r="1.6" fill="currentColor"/>
+              <circle cx="12" cy="12" r="1.6" fill="currentColor"/>
+              <circle cx="8.5" cy="15.5" r="1.6" fill="currentColor"/>
+              <circle cx="15.5" cy="15.5" r="1.6" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
       </div>
-
-      <button type="button" class="btn-primary btn-block" (click)="joinGame()" [disabled]="joining()">
-        @if (joining()) { Accesso in corso... } @else { Entra in officina → }
-      </button>
 
       @if (pinError()) {
-        <p class="field-error">Inserisci un codice di almeno 4 caratteri e il tuo nome.</p>
+        <p class="rl-field-error">Inserisci PIN e nickname per continuare.</p>
       }
-      @if (joinErrorMsg()) {
-        <p class="field-error">{{ joinErrorMsg() }}</p>
-      }
+
+      <button type="button" class="rl-cta" (click)="joinGame()" [disabled]="joining()">
+        <span>{{ joining() ? 'Un attimo...' : 'Entra in officina' }}</span>
+        <svg viewBox="0 0 24 24" fill="none" class="rl-icon rl-cta-arrow">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <p class="rl-card-footnote">Non hai un PIN? Chiedilo al tuo Game Master.</p>
     </section>
   </main>
 
+  <!-- ================= overlay di caricamento ================= -->
+  @if (joining()) {
+    <div class="rl-overlay">
+      <div class="rl-loading-card">
+        <div class="rl-spinner" aria-hidden="true"></div>
+        <p class="rl-loading-message">{{ loadingMessage }}</p>
+
+        <ul class="rl-checklist">
+          @for (step of loadingSteps; track step; let i = $index) {
+            <li class="rl-checklist-item" [class.rl-checklist-item--done]="i < loadingStep()" [class.rl-checklist-item--active]="i === loadingStep()">
+              <span class="rl-check-dot">
+                @if (i < loadingStep()) {
+                  <svg viewBox="0 0 24 24" fill="none" class="rl-icon">
+                    <path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                }
+              </span>
+              {{ step }}
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+
+  <!-- ================= toast ================= -->
+  <div class="rl-toast-stack" role="status" aria-live="polite">
+    @for (t of toasts(); track t.id) {
+      <div
+        class="rl-toast"
+        [class.rl-toast--success]="t.type === 'success'"
+        [class.rl-toast--error]="t.type === 'error'"
+        [class.rl-toast--warning]="t.type === 'warning'"
+        [class.rl-toast--leaving]="t.leaving"
+      >
+        <span class="rl-toast-icon">
+          @if (t.type === 'success') {
+            <svg viewBox="0 0 24 24" fill="none" class="rl-icon"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          } @else if (t.type === 'error') {
+            <svg viewBox="0 0 24 24" fill="none" class="rl-icon"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" class="rl-icon"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          }
+        </span>
+        <div class="rl-toast-body">
+          <p class="rl-toast-title">{{ t.title }}</p>
+          @if (t.message) { <p class="rl-toast-message">{{ t.message }}</p> }
+        </div>
+        <button type="button" class="rl-toast-close" (click)="dismissToast(t.id)" aria-label="Chiudi notifica">✕</button>
+      </div>
+    }
+  </div>
+
+  <!-- ================= modale Game Master ================= -->
   @if (showAdminModal()) {
-    <div class="modal-backdrop" (click)="closeAdminModal()">
-      <div class="modal-card corner-frame" (click)="$event.stopPropagation()">
-        <button type="button" class="modal-close" (click)="closeAdminModal()" aria-label="Chiudi">✕</button>
+    <div class="rl-modal-backdrop" (click)="closeAdminModal()">
+      <div class="rl-modal" (click)="$event.stopPropagation()">
+        <button type="button" class="rl-modal-close" (click)="closeAdminModal()" aria-label="Chiudi">✕</button>
 
-        <p class="eyebrow">Accesso riservato</p>
-        <h2 class="modal-title">Game Master</h2>
+        <div class="rl-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" class="rl-icon">
+            <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
 
-        <div class="field-group">
-          <label class="field-label" for="admin-username">Username</label>
+        <span class="rl-card-eyebrow">Accesso riservato</span>
+        <h2 class="rl-modal-title">Pannello Game Master</h2>
+
+        <div class="rl-field-group">
+          <label class="rl-field-label" for="admin-username">Username</label>
           <input
             id="admin-username"
-            class="field"
+            class="rl-field"
+            [class.rl-field--error]="adminError()"
             type="text"
             autocomplete="username"
             [value]="adminUsername()"
             (input)="onAdminUsernameInput($event)"
+            (keydown.enter)="adminLogin()"
           />
         </div>
 
-        <div class="field-group">
-          <label class="field-label" for="admin-password">Password</label>
+        <div class="rl-field-group">
+          <label class="rl-field-label" for="admin-password">Password</label>
           <input
             id="admin-password"
-            class="field"
+            class="rl-field"
+            [class.rl-field--error]="adminError()"
             type="password"
             autocomplete="current-password"
             [value]="adminPassword()"
@@ -100,13 +222,14 @@
         </div>
 
         @if (adminError()) {
-          <p class="field-error">Inserisci username e password.</p>
+          <p class="rl-field-error">Credenziali non valide. Riprova.</p>
         }
 
-        <button type="button" class="btn-primary btn-block" (click)="adminLogin()" [disabled]="adminLoading()">
-          @if (adminLoading()) { Verifica... } @else { Accedi al pannello }
+        <button type="button" class="rl-cta rl-cta--dark" (click)="adminLogin()" [disabled]="adminLoading()">
+          <span>{{ adminLoading() ? 'Verifica...' : 'Accedi al pannello' }}</span>
         </button>
       </div>
     </div>
   }
+
 </div>
