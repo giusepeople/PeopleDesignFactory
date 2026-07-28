@@ -6,3 +6,9 @@ CREATE SCHEMA public;
 
 
 -----------
+
+// PER SCARICARE QR CODE GENERATE PACCHETTO
+
+npm install qrcode
+npm install --save-dev @types/qrcode
+

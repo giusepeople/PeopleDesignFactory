@@ -186,6 +186,7 @@
               (info)="apriDrawer(game)"
               (remove)="apriElimina(game)"
               (open)="apriPartita(game)"
+              (fullscreen)="apriProiezione(game)"
             />
           }
         </div>
@@ -253,6 +254,11 @@
         }
       </aside>
     </div>
+  }
+
+  <!-- ================= codice a schermo intero + QR ================= -->
+  @if (partitaProiettata(); as g) {
+    <app-game-code-overlay [codice]="g.codice" (close)="chiudiProiezione()" />
   }
 
   <!-- ================= conferma eliminazione ================= -->

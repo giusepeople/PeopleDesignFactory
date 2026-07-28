@@ -12,11 +12,18 @@
       {{ statoLabel }}
     </span>
 
-    <button type="button" class="gc-btn gc-btn--icon" (click)="remove.emit()" aria-label="Elimina partita" title="Elimina partita">
-      <svg viewBox="0 0 24 24" fill="none" class="gc-icon">
-        <path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <div class="gc-top-actions">
+      <button type="button" class="gc-btn gc-btn--icon" (click)="fullscreen.emit()" aria-label="Mostra il codice a schermo intero" title="Mostra a schermo intero">
+        <svg viewBox="0 0 24 24" fill="none" class="gc-icon">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button type="button" class="gc-btn gc-btn--icon gc-btn--icon-danger" (click)="remove.emit()" aria-label="Elimina partita" title="Elimina partita">
+        <svg viewBox="0 0 24 24" fill="none" class="gc-icon">
+          <path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <p class="gc-eyebrow">Codice partita</p>

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, HostListener, signal, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { GameService } from '../../core/game.service';
 
@@ -48,6 +48,7 @@ export class Home implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private gameService = inject(GameService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // ---------- accesso partecipanti ----------
   pin = signal('');
@@ -71,6 +72,15 @@ export class Home implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.nickname.set(this.generaNickname());
+
+    // arrivo da un QR code proiettato dal Game Master: il link è del tipo
+    // "/?pin=AB12CD" e qui precompiliamo subito il campo, sanificando
+    // l'input allo stesso modo dell'inserimento manuale.
+    const pinDaUrl = this.route.snapshot.queryParamMap.get('pin');
+    if (pinDaUrl) {
+      const pulito = pinDaUrl.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+      if (pulito) this.pin.set(pulito);
+    }
   }
 
   ngOnDestroy() {

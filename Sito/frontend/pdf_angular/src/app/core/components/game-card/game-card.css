@@ -113,13 +113,17 @@
 .gc-btn:active { transform: scale(0.96); }
 .gc-btn .gc-icon { width: 15px; height: 15px; }
 
+.gc-top-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
 .gc-btn--icon {
   width: 34px; height: 34px;
   flex-shrink: 0;
-  background: rgba(255, 71, 87, 0.08);
-  color: var(--gc-red-dark);
+  background: rgba(20, 24, 58, 0.07);
+  color: var(--gc-ink-soft);
 }
-.gc-btn--icon:hover { background: rgba(255, 71, 87, 0.16); }
+.gc-btn--icon:hover { background: rgba(20, 24, 58, 0.13); }
+.gc-btn--icon-danger { background: rgba(255, 71, 87, 0.08); color: var(--gc-red-dark); }
+.gc-btn--icon-danger:hover { background: rgba(255, 71, 87, 0.16); }
 
 .gc-btn--secondary {
   flex: 1;

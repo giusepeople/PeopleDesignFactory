@@ -13,6 +13,7 @@ export class GameCard {
   @Output() info = new EventEmitter<void>();
   @Output() remove = new EventEmitter<void>();
   @Output() open = new EventEmitter<void>();
+  @Output() fullscreen = new EventEmitter<void>();
 
   get statoLabel(): string {
     switch (this.game.status) {

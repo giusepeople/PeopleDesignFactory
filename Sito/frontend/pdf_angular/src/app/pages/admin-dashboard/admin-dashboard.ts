@@ -4,6 +4,7 @@ import { GameService, GameSummary, FaseSummary, PannelloControllo } from '../../
 import { AuthService } from '../../core/auth.service';
 import { GameCard } from '../../core/components/game-card/game-card';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog';
+import { GameCodeOverlay } from '../../core/components/game-code-overlay/game-code-overlay';
 
 type LoadState = 'loading' | 'loaded' | 'error';
 type StatusFilter = 'ALL' | 'IN_ATTESA' | 'IN_CORSO' | 'TERMINATA';
@@ -25,7 +26,7 @@ const POLL_MS = 15000;
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [GameCard, ConfirmDialog],
+  imports: [GameCard, ConfirmDialog, GameCodeOverlay],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
@@ -59,6 +60,9 @@ export class AdminDashboard implements OnInit, OnDestroy {
   gameDaEliminare = signal<GameSummary | null>(null);
   eliminando = signal(false);
 
+  // ---------- proiezione a schermo intero (codice + QR) ----------
+  partitaProiettata = signal<GameSummary | null>(null);
+
   // ---------- creazione nuova partita ----------
   modalCreazioneAperta = signal(false);
   strutturaPreview = signal<FaseSummary[]>([]);
@@ -87,6 +91,7 @@ export class AdminDashboard implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscape() {
     if (this.modalCreazioneAperta()) this.chiudiModalCreazione();
+    else if (this.partitaProiettata()) this.chiudiProiezione();
     else if (this.drawerGame()) this.chiudiDrawer();
   }
 
@@ -225,6 +230,16 @@ export class AdminDashboard implements OnInit, OnDestroy {
 
   chiudiDrawer() {
     this.drawerGame.set(null);
+  }
+
+  // ---------- proiezione a schermo intero (codice + QR) ----------
+
+  apriProiezione(game: GameSummary) {
+    this.partitaProiettata.set(game);
+  }
+
+  chiudiProiezione() {
+    this.partitaProiettata.set(null);
   }
 
   // ---------- eliminazione ----------
