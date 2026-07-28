@@ -1,85 +1,352 @@
-<div class="dashboard">
-  <div class="grid-overlay grid-overlay--dark" aria-hidden="true"></div>
+<div class="gmd-page">
 
-  <header class="dashboard-header">
-    <div>
-      <p class="eyebrow eyebrow--on-dark">Pannello di controllo</p>
-      <h1 class="dashboard-title">Game Master</h1>
+  <!-- ================= sfondo ================= -->
+  <div class="gmd-bg" aria-hidden="true">
+    <div class="gmd-bg-grid"></div>
+    <div class="gmd-blob gmd-blob--a"></div>
+    <div class="gmd-blob gmd-blob--b"></div>
+  </div>
+
+  <!-- ================= topbar mobile ================= -->
+  <div class="gmd-mobile-bar">
+    <button type="button" class="gmd-icon-btn" (click)="toggleSidebar()" aria-label="Apri il menu">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+    <span class="gmd-mobile-brand">Red Line · Game Master</span>
+    <button type="button" class="gmd-icon-btn gmd-icon-btn--accent" (click)="apriModalCreazione()" aria-label="Nuova partita">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  @if (sidebarAperta()) {
+    <div class="gmd-sidebar-backdrop" (click)="chiudiSidebar()" aria-hidden="true"></div>
+  }
+
+  <!-- ================= sidebar ================= -->
+  <aside class="gmd-sidebar" [class.gmd-sidebar--aperta]="sidebarAperta()">
+    <div class="gmd-brand-row">
+      <div class="gmd-brand">
+        <div class="gmd-brand-badge">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M50 8 L56 8 L58 20 L67 24 L77 17 L83 23 L76 33 L80 42 L92 44 L92 56 L80 58 L76 67 L83 77 L77 83 L67 76 L58 80 L56 92 L44 92 L42 80 L33 76 L23 83 L17 77 L24 67 L20 58 L8 56 L8 44 L20 42 L24 33 L17 23 L23 17 L33 24 L42 20 Z" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+            <circle cx="50" cy="50" r="16" stroke="currentColor" stroke-width="5"/>
+          </svg>
+        </div>
+        <div class="gmd-brand-text">
+          <span class="gmd-brand-eyebrow">People Design Factory</span>
+          <span class="gmd-brand-name">Game Master</span>
+        </div>
+      </div>
+      <button type="button" class="gmd-sidebar-close" (click)="chiudiSidebar()" aria-label="Chiudi il menu">✕</button>
     </div>
-    <div class="header-actions">
-      <button type="button" class="btn-ghost btn-ghost--on-dark" (click)="infoPanel.apri()">Guida</button>
-      <button type="button" class="btn-ghost btn-ghost--on-dark" (click)="logout()">Esci</button>
+
+    <button type="button" class="gmd-cta-new" (click)="apriModalCreazione()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      Nuova partita
+    </button>
+
+    <div class="gmd-stats-grid">
+      <div class="gmd-stat-card">
+        <span class="gmd-stat-icon gmd-stat-icon--indigo">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <span class="gmd-stat-value">{{ totalePartite }}</span>
+        <span class="gmd-stat-label">Partite totali</span>
+      </div>
+
+      <div class="gmd-stat-card gmd-stat-card--live">
+        <span class="gmd-stat-icon gmd-stat-icon--mint">
+          <span class="gmd-live-dot" aria-hidden="true"></span>
+        </span>
+        <span class="gmd-stat-value">{{ partiteAttive }}</span>
+        <span class="gmd-stat-label">In corso ora</span>
+      </div>
+
+      <div class="gmd-stat-card">
+        <span class="gmd-stat-icon gmd-stat-icon--amber">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="gmd-stat-value">{{ partiteTerminate }}</span>
+        <span class="gmd-stat-label">Terminate</span>
+      </div>
+
+      <div class="gmd-stat-card">
+        <span class="gmd-stat-icon gmd-stat-icon--blue">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <span class="gmd-stat-value">{{ giocatoriInGioco }}</span>
+        <span class="gmd-stat-label">Giocatori in gioco</span>
+      </div>
     </div>
-  </header>
 
-  <app-info-panel #infoPanel />
-
-  <main class="dashboard-content">
-    @if (step() === 'loading') {
-      <p class="loading-text">Caricamento partite...</p>
-    }
-
-    @if (step() === 'lista') {
-      <button type="button" class="btn-primary create-btn" (click)="apriAnteprima()" [disabled]="loading()">
-        @if (loading()) { Caricamento... } @else { + Nuova partita }
-      </button>
-
-      @if (games().length > 0) {
-        <div class="games-list">
-          @for (game of games(); track game.id) {
-            <div class="game-card">
-              <div class="game-card-info">
-                <p class="game-code">{{ game.codice }}</p>
-                <span
-                  class="chip"
-                  [class.chip--blue]="game.status === 'IN_ATTESA'"
-                  [class.chip--green]="game.status === 'IN_CORSO'"
-                  [class.chip--amber]="game.status === 'TERMINATA'"
-                >{{ game.status }}</span>
-              </div>
-              <button type="button" class="btn-secondary" (click)="apriPannello(game.id)">Apri pannello →</button>
-            </div>
-          }
-        </div>
-      } @else {
-        <div class="empty-state">
-          <app-mascot [size]="100" />
-          <p class="empty-text">Non hai ancora creato nessuna partita.<br>Crea la prima sessione per iniziare.</p>
-        </div>
-      }
-    }
-
-    @if (step() === 'anteprima') {
-      <div class="struttura-preview surface-card">
-        <p class="eyebrow">Verifica struttura</p>
-        <h2 class="preview-title">7 fasi, 4 livelli</h2>
-
-        <div class="fase-list">
-          @for (fase of struttura(); track fase.id) {
-            <div class="fase-row">
-              <span class="fase-index">{{ fase.ordinal }}</span>
-              <div class="fase-row-content">
-                <p class="fase-nome">{{ fase.nome }}</p>
-                @if (fase.modulo) {
-                  <p class="fase-modulo">{{ fase.modulo.titolo }} — {{ fase.modulo.domande.length }} domande</p>
-                }
-              </div>
-              <span class="fase-durata">{{ fase.durataMinuti }} min</span>
-            </div>
-          }
-        </div>
-
-        <div class="preview-actions">
-          <button type="button" class="btn-secondary" (click)="annullaAnteprima()">Annulla</button>
-          <button type="button" class="btn-primary" (click)="confermaCreazione()" [disabled]="loading()">
-            @if (loading()) { Creazione in corso... } @else { Conferma e crea partita }
-          </button>
-        </div>
+    @if (ultimaPartita; as u) {
+      <div class="gmd-last-game">
+        <p class="gmd-last-game-label">Ultima partita creata</p>
+        <p class="gmd-last-game-code">{{ u.codice }}</p>
       </div>
     }
 
-    @if (error()) {
-      <p class="field-error field-error--on-dark">Si è verificato un errore. Riprova.</p>
-    }
+    <div class="gmd-sidebar-spacer"></div>
+
+    <button type="button" class="gmd-logout" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Esci
+    </button>
+  </aside>
+
+  <!-- ================= contenuto principale ================= -->
+  <main class="gmd-main">
+    <header class="gmd-header">
+      <div class="gmd-header-text">
+        <p class="gmd-eyebrow">Dashboard</p>
+        <h1 class="gmd-title">
+          @if (gmNome()) { Bentornato, {{ gmNome() }} } @else { Bentornato }
+        </h1>
+        <p class="gmd-date">{{ oggiFormattato }}</p>
+      </div>
+      <button type="button" class="gmd-cta-new gmd-cta-new--header" (click)="apriModalCreazione()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        Nuova partita
+      </button>
+    </header>
+
+    <section class="gmd-filters">
+      <label class="gmd-search">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input
+          type="text"
+          placeholder="Cerca per codice partita..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+          aria-label="Cerca per codice partita"
+        />
+      </label>
+
+      <div class="gmd-chip-group" role="group" aria-label="Filtra per stato">
+        <button type="button" class="gmd-chip" [class.gmd-chip--active]="statusFilter() === 'ALL'" (click)="setStatusFilter('ALL')">Tutte</button>
+        <button type="button" class="gmd-chip gmd-chip--waiting" [class.gmd-chip--active]="statusFilter() === 'IN_ATTESA'" (click)="setStatusFilter('IN_ATTESA')">In attesa</button>
+        <button type="button" class="gmd-chip gmd-chip--live" [class.gmd-chip--active]="statusFilter() === 'IN_CORSO'" (click)="setStatusFilter('IN_CORSO')">In corso</button>
+        <button type="button" class="gmd-chip gmd-chip--done" [class.gmd-chip--active]="statusFilter() === 'TERMINATA'" (click)="setStatusFilter('TERMINATA')">Terminate</button>
+      </div>
+
+      <select class="gmd-sort" [value]="sortBy()" (change)="onSortChange($event)" aria-label="Ordina le partite">
+        <option value="data_desc">Più recenti</option>
+        <option value="data_asc">Meno recenti</option>
+        <option value="giocatori_desc">Più giocatori</option>
+        <option value="codice_asc">Codice A-Z</option>
+      </select>
+
+      @if (filtriAttivi) {
+        <button type="button" class="gmd-reset-filtri" (click)="azzeraFiltri()">Azzera filtri ✕</button>
+      }
+    </section>
+
+    <section class="gmd-content">
+      @if (loadState() === 'loading') {
+        <div class="gmd-grid">
+          @for (i of skeletonItems; track i) {
+            <div class="gmd-skeleton"></div>
+          }
+        </div>
+      } @else if (loadState() === 'error') {
+        <div class="gmd-state-card">
+          <div class="gmd-state-icon gmd-state-icon--error">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </div>
+          <h2>Impossibile caricare le partite</h2>
+          <p>Controlla la connessione al server e riprova.</p>
+          <button type="button" class="gmd-btn-retry" (click)="caricaPartite()">Riprova</button>
+        </div>
+      } @else if (games().length === 0) {
+        <div class="gmd-state-card">
+          <div class="gmd-state-icon gmd-state-icon--empty">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="8" width="20" height="10" rx="5" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="13" r="1.4" fill="currentColor"/><path d="M12 13h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h2>Nessuna partita creata</h2>
+          <p>Crea la tua prima sessione per iniziare a giocare con i tuoi studenti.</p>
+          <button type="button" class="gmd-cta-new" (click)="apriModalCreazione()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+            Nuova partita
+          </button>
+        </div>
+      } @else if (filteredGames().length === 0) {
+        <div class="gmd-state-card">
+          <div class="gmd-state-icon gmd-state-icon--empty">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35M8 8l6 6M14 8l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h2>Nessun risultato</h2>
+          <p>Nessuna partita corrisponde ai filtri selezionati.</p>
+          <button type="button" class="gmd-btn-retry" (click)="azzeraFiltri()">Azzera filtri</button>
+        </div>
+      } @else {
+        <div class="gmd-grid">
+          @for (game of filteredGames(); track game.id) {
+            <app-game-card
+              [game]="game"
+              (info)="apriDrawer(game)"
+              (remove)="apriElimina(game)"
+              (open)="apriPartita(game)"
+            />
+          }
+        </div>
+      }
+    </section>
   </main>
+
+  <!-- ================= drawer informazioni partita ================= -->
+  @if (drawerGame(); as g) {
+    <div class="gmd-drawer-backdrop" (click)="chiudiDrawer()">
+      <aside class="gmd-drawer" (click)="$event.stopPropagation()">
+        <button type="button" class="gmd-drawer-close" (click)="chiudiDrawer()" aria-label="Chiudi pannello">✕</button>
+
+        <p class="gmd-eyebrow">Partita</p>
+        <h2 class="gmd-drawer-title">{{ g.codice }}</h2>
+        <span class="gmd-badge" [class.gmd-badge--waiting]="g.status === 'IN_ATTESA'" [class.gmd-badge--live]="g.status === 'IN_CORSO'" [class.gmd-badge--done]="g.status === 'TERMINATA'">
+          {{ etichettaStato(g.status) }}
+        </span>
+
+        @if (drawerLoading()) {
+          <p class="gmd-drawer-msg">Caricamento dettagli...</p>
+        } @else if (drawerError()) {
+          <p class="gmd-drawer-msg gmd-drawer-msg--error">Impossibile caricare i dettagli di questa partita.</p>
+        } @else if (drawerDettaglio(); as d) {
+
+          <div class="gmd-drawer-section">
+            <p class="gmd-drawer-label">Fase attuale</p>
+            <p class="gmd-drawer-value">
+              @if (d.faseAttuale) { {{ d.faseAttuale.ordinal }} · {{ d.faseAttuale.nome }} } @else { Non ancora avviata }
+            </p>
+          </div>
+
+          <div class="gmd-drawer-section">
+            <p class="gmd-drawer-label">Gruppi ({{ d.gruppi.length }})</p>
+
+            @if (d.gruppi.length === 0) {
+              <p class="gmd-drawer-empty">Nessun gruppo ancora formato.</p>
+            }
+
+            @for (gr of d.gruppi; track gr.id) {
+              <div class="gmd-group-block">
+                <p class="gmd-group-title">
+                  Gruppo {{ gr.teamNum }}
+                  <span class="gmd-mini-badge">{{ etichettaStato(gr.stato) }}</span>
+                </p>
+                <ul class="gmd-member-list">
+                  @for (m of gr.giocatori; track m.id) {
+                    <li>{{ m.nickname }} <span class="gmd-role-tag">{{ m.ruoloNome ?? 'ruolo non assegnato' }}</span></li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+
+          @if (d.giocatoriSenzaGruppo.length > 0) {
+            <div class="gmd-drawer-section">
+              <p class="gmd-drawer-label">In lobby, senza gruppo ({{ d.giocatoriSenzaGruppo.length }})</p>
+              <div class="gmd-tag-list">
+                @for (p of d.giocatoriSenzaGruppo; track p.id) {
+                  <span class="gmd-player-tag">{{ p.nickname }}</span>
+                }
+              </div>
+            </div>
+          }
+        }
+      </aside>
+    </div>
+  }
+
+  <!-- ================= conferma eliminazione ================= -->
+  @if (gameDaEliminare(); as g) {
+    <app-confirm-dialog
+      title="Eliminare questa partita?"
+      [message]="'Il codice ' + g.codice + ' e tutti i dati collegati (gruppi, giocatori, risposte) verranno eliminati per sempre.'"
+      confirmLabel="Elimina definitivamente"
+      cancelLabel="Annulla"
+      [danger]="true"
+      [loading]="eliminando()"
+      (confirm)="confermaElimina()"
+      (cancel)="annullaElimina()"
+    />
+  }
+
+  <!-- ================= modale nuova partita ================= -->
+  @if (modalCreazioneAperta()) {
+    <div class="gmd-modal-backdrop" (click)="chiudiModalCreazione()">
+      <div class="gmd-modal" (click)="$event.stopPropagation()">
+        <button type="button" class="gmd-modal-close" (click)="chiudiModalCreazione()" aria-label="Chiudi">✕</button>
+
+        <div class="gmd-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </div>
+
+        <p class="gmd-eyebrow">Nuova sessione</p>
+        <h2 class="gmd-modal-title">Verifica la struttura di gioco</h2>
+        <p class="gmd-modal-sub">7 fasi, 4 livelli — controlla che sia tutto pronto prima di generare il codice partita.</p>
+
+        @if (strutturaLoading()) {
+          <p class="gmd-drawer-msg">Caricamento struttura...</p>
+        } @else if (strutturaError()) {
+          <p class="gmd-drawer-msg gmd-drawer-msg--error">Impossibile caricare la struttura del gioco.</p>
+        } @else {
+          <div class="gmd-fase-list">
+            @for (fase of strutturaPreview(); track fase.id) {
+              <div class="gmd-fase-row">
+                <span class="gmd-fase-index">{{ fase.ordinal }}</span>
+                <div class="gmd-fase-row-content">
+                  <p class="gmd-fase-nome">{{ fase.nome }}</p>
+                  @if (fase.modulo) {
+                    <p class="gmd-fase-modulo">{{ fase.modulo.titolo }} — {{ fase.modulo.domande.length }} domande</p>
+                  }
+                </div>
+                <span class="gmd-fase-durata">{{ fase.durataMinuti }} min</span>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="gmd-modal-actions">
+          <button type="button" class="gmd-btn-secondary" (click)="chiudiModalCreazione()" [disabled]="creazioneLoading()">
+            Annulla
+          </button>
+          <button
+            type="button"
+            class="gmd-btn-primary"
+            (click)="confermaCreazione()"
+            [disabled]="creazioneLoading() || strutturaLoading() || strutturaError()"
+          >
+            @if (creazioneLoading()) { Creazione in corso... } @else { Conferma e crea partita }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= toast ================= -->
+  <div class="gmd-toast-stack" role="status" aria-live="polite">
+    @for (t of toasts(); track t.id) {
+      <div
+        class="gmd-toast"
+        [class.gmd-toast--success]="t.type === 'success'"
+        [class.gmd-toast--error]="t.type === 'error'"
+        [class.gmd-toast--warning]="t.type === 'warning'"
+        [class.gmd-toast--leaving]="t.leaving"
+      >
+        <span class="gmd-toast-icon">
+          @if (t.type === 'success') {
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          } @else if (t.type === 'error') {
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          }
+        </span>
+        <div class="gmd-toast-body">
+          <p class="gmd-toast-title">{{ t.title }}</p>
+          @if (t.message) { <p class="gmd-toast-message">{{ t.message }}</p> }
+        </div>
+        <button type="button" class="gmd-toast-close" (click)="dismissToast(t.id)" aria-label="Chiudi notifica">✕</button>
+      </div>
+    }
+  </div>
+
 </div>

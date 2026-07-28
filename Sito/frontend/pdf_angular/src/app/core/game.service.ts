@@ -8,6 +8,15 @@ export interface GameSummary {
   id: string;
   codice: string;
   status: string;
+  createdAt: string;
+  totaleGiocatori: number;
+  totaleGruppi: number;
+}
+
+export interface CreatedGame {
+  id: string;
+  codice: string;
+  status: string;
 }
 
 export interface DomandaSummary {
@@ -218,8 +227,8 @@ export class GameService {
 
   constructor(private http: HttpClient) {}
 
-  createGame(): Observable<GameSummary> {
-    return this.http.post<GameSummary>(`${this.apiUrl}/games`, {});
+  createGame(): Observable<CreatedGame> {
+    return this.http.post<CreatedGame>(`${this.apiUrl}/games`, {});
   }
 
   getStruttura(): Observable<FaseSummary[]> {
@@ -228,6 +237,10 @@ export class GameService {
 
   getMyGames(): Observable<GameSummary[]> {
     return this.http.get<GameSummary[]>(`${this.apiUrl}/games`);
+  }
+
+  deleteGame(partitaId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/games/${partitaId}`);
   }
 
   joinGame(codice: string, nickname: string): Observable<JoinResponse> {

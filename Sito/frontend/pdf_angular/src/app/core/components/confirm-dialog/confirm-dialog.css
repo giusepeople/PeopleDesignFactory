@@ -1,0 +1,92 @@
+:host {
+  --cd-ink: #14183A;
+  --cd-ink-soft: #545C82;
+  --cd-red: #FF4757;
+  --cd-red-dark: #C81E2E;
+  --cd-blue: #4A6BFF;
+  --cd-indigo: #3547C9;
+  --cd-paper: #FFFCF7;
+
+  --cd-font-display: 'Space Grotesk', var(--font-display), sans-serif;
+  --cd-font-body: 'Inter', var(--font-body), sans-serif;
+}
+
+.cd-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(10, 12, 40, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: cd-fade-in 0.18s ease both;
+}
+
+.cd-modal {
+  width: min(420px, 100%);
+  background: var(--cd-paper);
+  color: var(--cd-ink);
+  border-radius: 26px;
+  padding: 32px 28px 26px;
+  text-align: center;
+  box-shadow: 0 30px 70px rgba(8, 10, 40, 0.45);
+  animation: cd-rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  font-family: var(--cd-font-body);
+}
+
+.cd-icon {
+  width: 54px; height: 54px;
+  margin: 0 auto 16px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--cd-indigo), var(--cd-blue));
+  color: #fff;
+}
+.cd-icon svg { width: 26px; height: 26px; }
+.cd-icon--danger { background: linear-gradient(135deg, var(--cd-red), var(--cd-red-dark)); }
+
+.cd-title {
+  font-family: var(--cd-font-display);
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+.cd-message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cd-ink-soft);
+  margin: 0 0 8px;
+}
+
+.cd-actions { display: flex; gap: 10px; margin-top: 22px; }
+
+.cd-btn {
+  flex: 1;
+  font-family: var(--cd-font-display);
+  font-weight: 700;
+  font-size: 14.5px;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.15s ease, background 0.15s ease;
+}
+.cd-btn:active:not(:disabled) { transform: scale(0.97); }
+.cd-btn:disabled { opacity: 0.6; cursor: default; }
+
+.cd-btn--ghost { background: rgba(20, 24, 58, 0.07); color: var(--cd-ink); }
+.cd-btn--ghost:hover:not(:disabled) { background: rgba(20, 24, 58, 0.12); }
+
+.cd-btn--primary { background: linear-gradient(100deg, var(--cd-indigo), var(--cd-blue)); color: #fff; }
+.cd-btn--danger { background: linear-gradient(100deg, var(--cd-red), var(--cd-red-dark)); color: #fff; }
+.cd-btn--primary:hover:not(:disabled), .cd-btn--danger:hover:not(:disabled) { filter: brightness(1.06); }
+
+@keyframes cd-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cd-rise { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-backdrop, .cd-modal { animation-duration: 0.01ms !important; }
+}

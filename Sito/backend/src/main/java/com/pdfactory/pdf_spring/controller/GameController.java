@@ -72,15 +72,40 @@ public class GameController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CreateGameResponse>> getMyGames(Authentication authentication) {
+    public ResponseEntity<List<GameSummaryDTO>> getMyGames(Authentication authentication) {
         List<Partita> partite = partitaRepository
                 .findByGameMaster_NomeOrderByCreatedAtDesc(authentication.getName());
 
-        List<CreateGameResponse> response = partite.stream()
-                .map(p -> new CreateGameResponse(p.getId(), p.getCodPartita(), p.getStatus().name()))
+        List<GameSummaryDTO> response = partite.stream()
+                .map(p -> new GameSummaryDTO(
+                        p.getId(),
+                        p.getCodPartita(),
+                        p.getStatus().name(),
+                        p.getCreatedAt(),
+                        giocatoreRepository.findByPartitaId(p.getId()).size(),
+                        gruppoRepository.findByPartitaIdOrderByTeamNumAsc(p.getId()).size()
+                ))
                 .toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    // eliminazione definitiva: grazie ai cascade ALL + orphanRemoval su Partita
+    // (gruppi, giocatori) e a cascata su InvioModulo/Risposta, basta cancellare
+    // la Partita per ripulire correttamente tutto il grafo collegato.
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteGame(@PathVariable UUID id, Authentication authentication) {
+        Partita partita = partitaRepository.findById(id).orElse(null);
+        if (partita == null) {
+            return ResponseEntity.status(404).body("Partita non trovata");
+        }
+        if (!partita.getGameMaster().getNome().equals(authentication.getName())) {
+            return ResponseEntity.status(403).body("Non sei il Game Master di questa partita");
+        }
+
+        partitaRepository.delete(partita);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/struttura")

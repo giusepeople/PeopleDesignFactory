@@ -11,8 +11,10 @@ interface LoginResponse {
 export class AuthService {
   private readonly apiUrl = 'http://localhost:8080';
   private readonly tokenKey = 'gm_token';
+  private readonly nomeKey = 'gm_nome';
 
   isLoggedIn = signal(!!localStorage.getItem(this.tokenKey));
+  gmNome = signal<string | null>(localStorage.getItem(this.nomeKey));
 
   constructor(private http: HttpClient) {}
 
@@ -22,13 +24,17 @@ export class AuthService {
       .pipe(
         tap((res) => {
           localStorage.setItem(this.tokenKey, res.token);
+          localStorage.setItem(this.nomeKey, res.nome);
           this.isLoggedIn.set(true);
+          this.gmNome.set(res.nome);
         })
       );
   }
 
   logout() {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.nomeKey);
     this.isLoggedIn.set(false);
+    this.gmNome.set(null);
   }
 }
