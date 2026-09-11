@@ -1,11 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
 import { toDataURL } from 'qrcode';
 
-/**
- * Overlay a schermo intero pensato per essere proiettato in aula: codice
- * partita in grande + QR code che porta dritti alla Home con il PIN già
- * precompilato (vedi Home#ngOnInit, legge il query param "pin").
- */
+
 @Component({
   selector: 'app-game-code-overlay',
   imports: [],
