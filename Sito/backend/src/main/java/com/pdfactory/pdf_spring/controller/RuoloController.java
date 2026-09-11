@@ -19,7 +19,6 @@ public class RuoloController {
         this.ruoloRepository = ruoloRepository;
     }
 
-    // pubblico: serve ai giocatori durante il Briefing per mostrare tutte le schede ruolo
     @GetMapping
     public ResponseEntity<List<RuoloSummaryDTO>> getRuoli() {
         List<RuoloSummaryDTO> dto = ruoloRepository.findAll().stream()

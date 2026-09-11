@@ -43,8 +43,6 @@ public class Domanda {
     @Column(name = "hint_text", columnDefinition = "TEXT")
     private String hintText;
 
-    // nullable: se valorizzato, solo chi ha questo ruolo puo' compilare il campo
-    // (lato UI); l'invio finale resta comunque a carico del PM/QA
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restricted_role_id")
     private Ruolo restrictedRole;

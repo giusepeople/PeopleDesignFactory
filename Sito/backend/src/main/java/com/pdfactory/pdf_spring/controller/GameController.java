@@ -20,7 +20,6 @@ import java.util.*;
 @RequestMapping("/games")
 public class GameController {
 
-    // niente 0/O/1/I: caratteri troppo simili da leggere a schermo o dettare a voce
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int DIMENSIONE_GRUPPO = 5;
@@ -47,7 +46,6 @@ public class GameController {
         this.ruoloRepository = ruoloRepository;
     }
 
-    // ---------- GM: creazione e lista partite ----------
 
     @PostMapping
     public ResponseEntity<CreateGameResponse> createGame(Authentication authentication) {
@@ -90,9 +88,6 @@ public class GameController {
         return ResponseEntity.ok(response);
     }
 
-    // eliminazione definitiva: grazie ai cascade ALL + orphanRemoval su Partita
-    // (gruppi, giocatori) e a cascata su InvioModulo/Risposta, basta cancellare
-    // la Partita per ripulire correttamente tutto il grafo collegato.
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteGame(@PathVariable UUID id, Authentication authentication) {
         Partita partita = partitaRepository.findById(id).orElse(null);
@@ -131,7 +126,6 @@ public class GameController {
         return ResponseEntity.ok(response);
     }
 
-    // ---------- Giocatore: ingresso in lobby ----------
 
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody JoinGameRequest request) {
@@ -239,7 +233,6 @@ public class GameController {
         ));
     }
 
-    // ---------- GM: avvio partita e formazione gruppi ----------
 
     @PostMapping("/{id}/avvia")
     public ResponseEntity<?> avviaPartita(@PathVariable UUID id, Authentication authentication) {
@@ -285,7 +278,6 @@ public class GameController {
         return ResponseEntity.ok(buildPannello(partita));
     }
 
-    // ---------- helpers ----------
 
     private void assegnaGruppiERuoli(Partita partita, List<Giocatore> giocatori) {
         List<Giocatore> pool = new ArrayList<>(giocatori);
@@ -323,11 +315,7 @@ public class GameController {
         }
     }
 
-    /**
-     * Turbativa 1 - "Il cambio di scuderia": ogni Project Manager si sposta al
-     * tavolo successivo in senso orario (l'ultimo gruppo passa il PM al primo).
-     * Il ruolo PM resta invariato: cambia solo il gruppo di appartenenza del giocatore.
-     */
+
     private void ruotaProjectManager(Partita partita) {
         List<Gruppo> gruppi = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(partita.getId());
         if (gruppi.size() < 2) {
@@ -336,7 +324,6 @@ public class GameController {
 
         List<Giocatore> tutti = giocatoreRepository.findByPartitaId(partita.getId());
 
-        // snapshot del PM attuale di ogni gruppo, PRIMA di spostare chiunque
         Map<UUID, Giocatore> pmAttualeDelGruppo = new HashMap<>();
         for (Gruppo g : gruppi) {
             Giocatore pm = tutti.stream()
@@ -347,7 +334,6 @@ public class GameController {
             pmAttualeDelGruppo.put(g.getId(), pm);
         }
 
-        // ogni PM si sposta al tavolo successivo (senso orario); l'ultimo va al primo
         for (int i = 0; i < gruppi.size(); i++) {
             Giocatore pm = pmAttualeDelGruppo.get(gruppi.get(i).getId());
             if (pm == null) continue; // difensivo: a partita avviata non dovrebbe succedere
@@ -390,8 +376,6 @@ public class GameController {
             faseDto = new FaseCorrenteDTO(f.getId(), f.getOrdinal(), f.getNome(), f.getTipo().name(), f.getDefaultDurataMinuti());
         }
 
-        // un gruppo e' "pronto" per avanzare sia quando ha semplicemente segnalato PRONTO (es. Briefing)
-        // sia quando il Game Master ha approvato il suo Foglio Risposta del Livello corrente
         boolean tuttiPronti = !gruppi.isEmpty() && gruppi.stream()
                 .allMatch(g -> g.getStato() == StatoTeam.PRONTO || g.getStato() == StatoTeam.APPROVATO);
 
@@ -414,8 +398,6 @@ public class GameController {
         return code;
     }
 
-    // ---------- fase corrente (pubblico: GM e giocatori) ----------
-
     @GetMapping("/{id}/fase-corrente")
     public ResponseEntity<?> getFaseCorrente(@PathVariable UUID id) {
         Partita partita = partitaRepository.findById(id).orElse(null);
@@ -426,7 +408,6 @@ public class GameController {
         return ResponseEntity.ok(buildFaseCorrenteResponse(partita));
     }
 
-    // ---------- GM: avanzamento manuale di fase ----------
 
     @PostMapping("/{id}/avanza-fase")
     public ResponseEntity<?> avanzaFase(@PathVariable UUID id, Authentication authentication) {
@@ -466,7 +447,6 @@ public class GameController {
 
         partitaRepository.save(partita);
 
-        // reset dello stato "pronto" dei gruppi in vista del prossimo round
         List<Gruppo> gruppi = gruppoRepository.findByPartitaIdOrderByTeamNumAsc(id);
         gruppi.forEach(g -> g.setStato(StatoTeam.LAVORANDO));
         gruppoRepository.saveAll(gruppi);
@@ -474,7 +454,6 @@ public class GameController {
         return ResponseEntity.ok(buildPannello(partita));
     }
 
-    // ---------- GM: attivazione manuale della complicazione (Livello 2 e futuri livelli simili) ----------
 
     @PostMapping("/{id}/attiva-complicazione")
     public ResponseEntity<?> attivaComplicazione(@PathVariable UUID id, Authentication authentication) {

@@ -22,7 +22,6 @@ public class Partita
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // Codice mostrato a schermo dal GM per far entrare gli studenti
     @Column(nullable = false, unique = true, length = 10)
     private String codPartita;
 
@@ -47,12 +46,9 @@ public class Partita
     @Column(name = "ended_at")
     private Instant endedAt;
 
-    // timestamp di inizio della fase corrente, usato per calcolare il tempo residuo
     @Column(name = "fase_iniziata_il")
     private Instant faseIniziataIl;
 
-    // stato della complicazione della fase corrente, attivabile manualmente dal GM;
-    // viene resettato ad ogni cambio fase
     @Column(name = "complicazione_attivata", nullable = false)
     private Boolean complicazioneAttivata = false;
 

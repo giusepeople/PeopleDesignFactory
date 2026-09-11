@@ -14,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(2) // dopo il DataSeeder/RuoloSeeder del GM e dei ruoli
+@Order(2)
 public class GameStructureSeeder implements CommandLineRunner {
 
     private final FaseRepository faseRepository;

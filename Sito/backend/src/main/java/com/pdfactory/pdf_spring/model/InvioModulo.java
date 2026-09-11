@@ -31,7 +31,6 @@ public class InvioModulo {
     @JoinColumn(name = "modulo_id", nullable = false)
     private Modulo modulo;
 
-    // chi ha effettivamente premuto "invia" (di solito il PM, a volte il QA)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inviato_da_giocatore_id")
     private Giocatore inviatoDa;

@@ -40,7 +40,6 @@ public class Risposta {
     @Column(name = "testo_risposta", columnDefinition = "TEXT")
     private String testoRisposta;
 
-    // motivazione testuale abbinata (es. giustificazione della scelta multipla)
     @Column(name = "giustificazione", columnDefinition = "TEXT")
     private String giustificazione;
 

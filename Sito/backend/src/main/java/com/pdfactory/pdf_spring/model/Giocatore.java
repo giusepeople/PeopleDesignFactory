@@ -23,12 +23,10 @@ public class Giocatore
     @JoinColumn(name = "id_partita", nullable = false)
     private Partita partita;
 
-    // nullable finche' il GM non assegna i gruppi in lobby
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gruppo_id")
     private Gruppo gruppo;
 
-    // nullable finche' non assegnato; puo' cambiare (scambio PM in Turbativa 1)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Ruolo ruolo;

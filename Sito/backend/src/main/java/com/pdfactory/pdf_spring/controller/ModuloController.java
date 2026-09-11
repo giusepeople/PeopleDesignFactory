@@ -48,7 +48,6 @@ public class ModuloController {
         this.gameMasterRepository = gameMasterRepository;
     }
 
-    // ---------- Giocatore: visualizzazione e compilazione del modulo della fase corrente ----------
 
     @GetMapping("/{id}/modulo-corrente")
     public ResponseEntity<?> getModuloCorrente(
@@ -179,7 +178,6 @@ public class ModuloController {
                 boolean corretta = domanda.getOpzioneCorretta().equals(input.testoRisposta());
                 risposta.setCorretta(corretta);
 
-                // hint + 5 minuti extra automatici alla PRIMA risposta sbagliata a questa domanda
                 if (!corretta && !Boolean.TRUE.equals(risposta.getHintUsato())) {
                     risposta.setHintUsato(true);
                     int attuali = invio.getMinutiExtra() != null ? invio.getMinutiExtra() : 0;
@@ -190,7 +188,6 @@ public class ModuloController {
             rispostaRepository.save(risposta);
         }
 
-        // persiste eventuali minuti extra automatici assegnati sopra
         invioModuloRepository.save(invio);
 
         if (finalizza) {
@@ -215,7 +212,6 @@ public class ModuloController {
         return ResponseEntity.ok().build();
     }
 
-    // ---------- Game Master: revisione dei moduli inviati dai gruppi ----------
 
     @GetMapping("/{id}/moduli/revisione")
     public ResponseEntity<?> getRevisione(@PathVariable UUID id, Authentication authentication) {
@@ -317,7 +313,6 @@ public class ModuloController {
         return ResponseEntity.ok().build();
     }
 
-    // ---------- helpers ----------
 
     private Giocatore autenticaGiocatore(Partita partita, UUID giocatoreId, String sessionToken) {
         if (giocatoreId == null || sessionToken == null) return null;
@@ -477,10 +472,7 @@ public class ModuloController {
         }
     }
 
-    /**
-     * Una complicazione (se prevista dalla fase) diventa visibile automaticamente dopo
-     * complicazioneDopoMinuti dall'inizio fase, oppure se il GM l'ha attivata manualmente.
-     */
+
     private boolean isComplicazioneVisibile(Partita partita, Fase fase) {
         if (fase.getComplicazioneTesto() == null || fase.getComplicazioneTesto().isBlank()) {
             return false;

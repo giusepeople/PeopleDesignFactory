@@ -39,11 +39,9 @@ public class Fase
     @Column(name = "dati_json", columnDefinition = "TEXT")
     private String datiJson;
 
-    // opzioni decisionali (es. Livello 2: opzione A/B/C con costo, tempo, rischio)
     @Column(name = "opzioni_json", columnDefinition = "TEXT")
     private String opzioniJson;
 
-    // evento opzionale che si attiva dopo N minuti dall'inizio fase (o manualmente dal GM)
     @Column(name = "complicazione_testo", columnDefinition = "TEXT")
     private String complicazioneTesto;
 
